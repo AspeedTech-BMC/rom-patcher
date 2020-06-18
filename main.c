@@ -19,27 +19,38 @@
 #define PHY_STS_BASE	(MMC_BASE + 0x400)
 #define MMC_UNLOCK_KEY 	0xfc600309
 
+/* secure boot controller */
+#define SBC_BASE		0x1e6f2000
+#define OTP_QSR			0x40
+
+#define SRAM_BASE		0x10000000	/* 64KB */
+#define SRAM1_BASE		0x10010000	/* 24KB */
+#define SPI_BASE		0x20000000
+#define DRAM_BASE		CONFIG_SYS_SDRAM_BASE
+
+#define N_LABEL			32
+#define N_CODE			512
 typedef struct label_s {
-    char name[32];
+    char name[N_LABEL];
     int offset;
 } label_t;
 
 typedef struct rom_lables_s {
-    label_t labels[32];
+    label_t labels[N_LABEL];
     int count;
 } rom_labels_t;
 
 /* log "jump" instructions */
 typedef struct log_jmp_s {
-    rom_op_jmp_t *log[32];
-    char label[32][32];
+    rom_op_jmp_t *log[N_LABEL];
+    char label[N_LABEL][32];
     int count;
 } log_jmp_t;
 
 /**
  * global data
 */
-uint32_t rom_code[512];
+uint32_t rom_code[N_CODE];
 rom_labels_t rom_labels = { .count = 0 };
 
 log_jmp_t jmp_list = { .count = 0 };
@@ -229,23 +240,23 @@ uint32_t *sdrammc_fpga_set_pll(uint32_t *ptr)
 #define AST_SCU_FPGA_STS        0x004
 #define AST_SCU_FPGA_PLL        0x400
 
-	ptr = wr_single(ptr, SCU_BASE + AST_SCU_FPGA_PLL, 0x00000303);
+    ptr = wr_single(ptr, SCU_BASE + AST_SCU_FPGA_PLL, 0x00000303);
 	ptr = waiteq_code(ptr, SCU_BASE + AST_SCU_FPGA_STS, 0x100, 0x100, 1);
 	ptr = wr_single(ptr, SCU_BASE + AST_SCU_FPGA_PLL, 0x00000103);
 
-	return ptr;
+    return ptr;
 }
 
 uint32_t *sdrammc_search_read_window(uint32_t *ptr)
 {
-#define SRAM_BASE				0x10000000
-#define var_win					(SRAM_BASE + 0)
+#define var_win					(SRAM1_BASE + 0)
 
 #ifdef CONFIG_ASPEED_PALLADIUM
 	ptr = wr_single(ptr, PHY_BASE + 0x00, 0x0000000c);
 	return ptr;
 #endif
 
+#ifdef CONFIG_FPGA_ASPEED
 	ptr = wr_single(ptr, SEARCH_RDWIN_ANCHOR_0, SEARCH_RDWIN_PTRN_0);
     ptr = wr_single(ptr, SEARCH_RDWIN_ANCHOR_1, SEARCH_RDWIN_PTRN_1);
 	ptr = wr_single(ptr, PHY_BASE + 0x00, 0x0000000c);
@@ -259,7 +270,7 @@ uint32_t *sdrammc_search_read_window(uint32_t *ptr)
 	ptr = sdrammc_fpga_set_pll(ptr);
 	ptr = add_code(ptr, var_win, 1);
 	ptr = log_jne(ptr, var_win, GENMASK(31, 0), 256, "l_cali_rd_win_start");
-
+#endif
 	return ptr;
 }
 
@@ -355,6 +366,26 @@ int main()
 
 	/* set handshake bits */
 	ptr = setbit_code(ptr, SCU_BASE + 0x100, BIT(7) | BIT(6));
+
+	/* copy CM3 bootcode */
+	ptr = log_jeq(ptr, SBC_BASE + OTP_QSR, BIT(26), BIT(26), "l_copy_from_sram");
+	ptr = cp_code(ptr, SPI_BASE, DRAM_BASE, 64 * 1024 / sizeof(uint32_t));
+	ptr = log_jmp(ptr, "l_copy_done");
+	log_label(ptr, "l_copy_from_sram");	
+	ptr = cp_code(ptr, SRAM_BASE, DRAM_BASE, 64 * 1024 / sizeof(uint32_t));
+	log_label(ptr, "l_copy_done");
+	
+	/* enable CM3 */
+	ptr = wr_single(ptr, SCU_BASE + 0xa00, 0);
+	ptr = wr_single(ptr, SCU_BASE + 0xa04, 0x80000000);
+	ptr = wr_single(ptr, SCU_BASE + 0xa48, 3);
+	ptr = wr_single(ptr, SCU_BASE + 0xa48, 1);
+	ptr = wr_single(ptr, SCU_BASE + 0xa08, 0x80100000);
+	ptr = wr_single(ptr, SCU_BASE + 0xa0c, 0x80200000);
+	ptr = wr_single(ptr, SCU_BASE + 0xa00, 2);
+	ptr = delay_code(ptr, 500);
+	ptr = wr_single(ptr, SCU_BASE + 0xa00, 0);
+	ptr = wr_single(ptr, SCU_BASE + 0xa00, 1);
     /* ---------- end ---------- */
     log_label(ptr, "l_end");
     ptr = quit_code(ptr);
