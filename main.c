@@ -6,30 +6,34 @@
 #include "ddr4_ac.h"
 #include "ddr4_phy.h"
 
-#define SCU_BASE 		0x1e6e2000
-#define MPLL_REG 		(SCU_BASE + 0x220)
-#define MPLL_EXT_REG 	(SCU_BASE + 0x224)
-#define STRAP_REG		(SCU_BASE + 0x500)
+#define SCU_BASE 			0x1e6e2000
+#define MPLL_REG 			(SCU_BASE + 0x220)
+#define MPLL_EXT_REG 		(SCU_BASE + 0x224)
+#define STRAP_REG			(SCU_BASE + 0x500)
 
-#define MPLL_FREQ_400M 	0x0008405f
-#define MPLL_EXT_400M 	0x00000031
+#define MPLL_FREQ_400M 		0x0008405f
+#define MPLL_EXT_400M 		0x00000031
 
-#define MMC_BASE 		0x1e6e0000
-#define PHY_BASE 		(MMC_BASE + 0x100)
-#define PHY_STS_BASE	(MMC_BASE + 0x400)
-#define MMC_UNLOCK_KEY 	0xfc600309
+#define MMC_BASE 			0x1e6e0000
+#define PHY_BASE 			(MMC_BASE + 0x100)
+#define PHY_STS_BASE		(MMC_BASE + 0x400)
+#define MMC_UNLOCK_KEY 		0xfc600309
 
 /* secure boot controller */
-#define SBC_BASE		0x1e6f2000
-#define OTP_QSR			0x40
+#define SBC_BASE			0x1e6f2000
+#define OTP_QSR				0x40
 
-#define SRAM_BASE		0x10000000	/* 64KB */
-#define SRAM1_BASE		0x10010000	/* 24KB */
-#define SPI_BASE		0x20000000
-#define DRAM_BASE		CONFIG_SYS_SDRAM_BASE
+#define SRAM_BASE			0x10000000	/* 64KB */
+#define SRAM1_BASE			0x10010000	/* 24KB */
+#define SPI_BASE			0x20000000
+#define DRAM_BASE			CONFIG_SYS_SDRAM_BASE
 
-#define N_LABEL			32
-#define N_CODE			512
+#define N_LABEL				32
+#define N_CODE				512
+#define SB_HDR_SIZE_BYTE	0x20
+#define SB_HDR_SIZE_DW		(SB_HDR_SIZE_BYTE / sizeof(uint32_t))
+#define CM3_BIN_SIZE_DW		(47 * 1024 / sizeof(uint32_t))
+
 typedef struct label_s {
     char name[N_LABEL];
     int offset;
@@ -331,6 +335,7 @@ int main()
 {
     int i, size;
     uint32_t *ptr = rom_code;
+	uint32_t cm3_bin_offset;
 	FILE *fp;
 
     log_label(ptr, "l_start");
@@ -368,11 +373,12 @@ int main()
 	ptr = setbit_code(ptr, SCU_BASE + 0x100, BIT(7) | BIT(6));
 
 	/* copy CM3 bootcode */
+	cm3_bin_offset = SB_HDR_SIZE_BYTE + sizeof(rom_code);
 	ptr = log_jeq(ptr, SBC_BASE + OTP_QSR, BIT(26), BIT(26), "l_copy_from_sram");
-	ptr = cp_code(ptr, SPI_BASE + sizeof(rom_code), DRAM_BASE, 64 * 1024 / sizeof(uint32_t));
+	ptr = cp_code(ptr, SPI_BASE + cm3_bin_offset, DRAM_BASE, CM3_BIN_SIZE_DW);
 	ptr = log_jmp(ptr, "l_copy_done");
 	log_label(ptr, "l_copy_from_sram");	
-	ptr = cp_code(ptr, SRAM_BASE + sizeof(rom_code), DRAM_BASE, 64 * 1024 / sizeof(uint32_t));
+	ptr = cp_code(ptr, SRAM_BASE + cm3_bin_offset, DRAM_BASE, CM3_BIN_SIZE_DW);
 	log_label(ptr, "l_copy_done");
 	
 	/* enable CM3 */
