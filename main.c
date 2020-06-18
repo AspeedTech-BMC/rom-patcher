@@ -224,8 +224,42 @@ uint32_t *sdrammc_init_ddr4(uint32_t *ptr)
 	return ptr;
 }
 
+uint32_t *sdrammc_fpga_set_pll(uint32_t *ptr)
+{
+#define AST_SCU_FPGA_STS        0x004
+#define AST_SCU_FPGA_PLL        0x400
+
+	ptr = wr_single(ptr, SCU_BASE + AST_SCU_FPGA_PLL, 0x00000303);
+	ptr = waiteq_code(ptr, SCU_BASE + AST_SCU_FPGA_STS, 0x100, 0x100, 1);
+	ptr = wr_single(ptr, SCU_BASE + AST_SCU_FPGA_PLL, 0x00000103);
+
+	return ptr;
+}
+
 uint32_t *sdrammc_search_read_window(uint32_t *ptr)
 {
+#define SRAM_BASE				0x10000000
+#define var_win					(SRAM_BASE + 0)
+
+#ifdef CONFIG_ASPEED_PALLADIUM
+	ptr = wr_single(ptr, PHY_BASE + 0x00, 0x0000000c);
+	return ptr;
+#endif
+
+	ptr = wr_single(ptr, SEARCH_RDWIN_ANCHOR_0, SEARCH_RDWIN_PTRN_0);
+    ptr = wr_single(ptr, SEARCH_RDWIN_ANCHOR_1, SEARCH_RDWIN_PTRN_1);
+	ptr = wr_single(ptr, PHY_BASE + 0x00, 0x0000000c);
+	log_label(ptr, "l_check_value_start");
+	ptr = sdrammc_fpga_set_pll(ptr);
+	ptr = log_jeq(ptr, SEARCH_RDWIN_ANCHOR_0, GENMASK(31, 0), SEARCH_RDWIN_PTRN_0, "l_check_value_start");
+	ptr = log_jeq(ptr, SEARCH_RDWIN_ANCHOR_1, GENMASK(31, 0), SEARCH_RDWIN_PTRN_1, "l_check_value_start");
+
+	ptr = wr_single(ptr, var_win, 0);
+	log_label(ptr, "l_cali_rd_win_start");
+	ptr = sdrammc_fpga_set_pll(ptr);
+	ptr = add_code(ptr, var_win, 1);
+	ptr = log_jne(ptr, var_win, GENMASK(31, 0), 256, "l_cali_rd_win_start");
+
 	return ptr;
 }
 
@@ -267,15 +301,15 @@ uint32_t *sdrammc_calc_size(uint32_t *ptr)
 	// VGA 8MB -> set to 16MB
 	ptr = setbit_code(ptr, STRAP_REG, 0x1 << 13);
 	log_label(ptr, "l_vga_size_16m");
-	ptr = rmw_code(ptr, MMC_BASE + 0x04, ~GENMASK(3, 2), 0x1);
+	ptr = rmw_code(ptr, MMC_BASE + 0x04, ~GENMASK(3, 2), 0x1 << 2);
 	ptr = log_jmp(ptr, "l_size_done_1");
 
 	log_label(ptr, "l_vga_size_32m");
-	ptr = rmw_code(ptr, MMC_BASE + 0x04, ~GENMASK(3, 2), 0x2);
+	ptr = rmw_code(ptr, MMC_BASE + 0x04, ~GENMASK(3, 2), 0x2 << 2);
 	ptr = log_jmp(ptr, "l_size_done_1");
 
 	log_label(ptr, "l_vga_size_64m");
-	ptr = rmw_code(ptr, MMC_BASE + 0x04, ~GENMASK(3, 2), 0x3);
+	ptr = rmw_code(ptr, MMC_BASE + 0x04, ~GENMASK(3, 2), 0x3 << 2);
 	ptr = log_jmp(ptr, "l_size_done_1");
 /* l_size_done_1 */
 	log_label(ptr, "l_size_done_1");

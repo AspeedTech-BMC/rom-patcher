@@ -104,6 +104,9 @@ uint32_t* delay_code(uint32_t *ptr, uint32_t delay)
 	return ptr;
 }
 
+/**
+ * *addr = (*addr & mask) + value 
+*/
 uint32_t* rmw_code(uint32_t *ptr, uint32_t addr, uint32_t mask, uint32_t value)
 {
 	rom_op_rmw_t code = {.cmd.b.cmd = 0x2};
@@ -117,12 +120,26 @@ uint32_t* rmw_code(uint32_t *ptr, uint32_t addr, uint32_t mask, uint32_t value)
 	return ptr;
 }
 
+/**
+ * *addr = (*addr & ~value) + 0 
+*/
 uint32_t* clrbit_code(uint32_t *ptr, uint32_t addr, uint32_t value)
 {
-	return rmw_code(ptr, addr, ~value, 0);
+	return rmw_code(ptr, addr, ~(value), 0);
 }
 
+/**
+ * *addr = (*addr & ~value) + value 
+*/
 uint32_t* setbit_code(uint32_t *ptr, uint32_t addr, uint32_t value)
+{
+	return rmw_code(ptr, addr, ~(value), value);
+}
+
+/**
+ * *addr = (*addr & 0xffffffff) + value 
+*/
+uint32_t* add_code(uint32_t *ptr, uint32_t addr, uint32_t value)
 {
 	return rmw_code(ptr, addr, GENMASK(31, 0), value);
 }

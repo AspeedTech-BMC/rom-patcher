@@ -69,4 +69,5 @@ uint32_t* delay_code(uint32_t *ptr, uint32_t delay);
 uint32_t* rmw_code(uint32_t *ptr, uint32_t addr, uint32_t mask, uint32_t value);
 uint32_t* clrbit_code(uint32_t *ptr, uint32_t addr, uint32_t value);
 uint32_t* setbit_code(uint32_t *ptr, uint32_t addr, uint32_t value);
+uint32_t* add_code(uint32_t *ptr, uint32_t addr, uint32_t value);
 uint32_t* cp_code(uint32_t *ptr, uint32_t src, uint32_t dst, uint32_t size_dw);
