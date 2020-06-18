@@ -1,0 +1,567 @@
+/* check if already initialized */
+Read  [0x1e6e2100] = 0x00000000    ◊ goto /* calculate size */ if SCU100[6]==1
+
+/* setup MPLL */
+Read  [0x1e6e2220] = 0x1008405f    ◊ temp = read(scu220) & 0xFE800000;
+Write [0x1e6e2220] = 0x1288405f    ◊ scu220 = temp | ((1 << 25) | 0x8405F)
+Write [0x1e6e2224] = 0x00000031
+delay 100 us
+Write [0x1e6e2220] = 0x1008405f
+Read  [0x1e6e2224] = 0x00000031    ◊ polling SCU224[31] for MPLL stable
+Read  [0x1e6e2224] = 0x80000031
+
+/* unlock MMC */
+Write [0x1e6e0000] = 0xfc600309
+Read  [0x1e6e0000] = 0x00000001    ◊ polling MMC0[1]
+
+/* setup MMC */
+Write [0x1e6e0034] = 0x000000c0
+Write [0x1e6e0008] = 0x00440003
+Write [0x1e6e0038] = 0x00100000
+Write [0x1e6e003c] = 0xffbbfff4
+Write [0x1e6e0040] = 0x44444444
+Write [0x1e6e0044] = 0x44444444
+Write [0x1e6e0048] = 0x44444444
+Write [0x1e6e004c] = 0x44444444
+Write [0x1e6e0050] = 0x80000000
+Write [0x1e6e0054] = 0x07ffffff
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0074] = 0x80000001
+Write [0x1e6e0078] = 0x00000000
+Write [0x1e6e007c] = 0x00000000
+Write [0x1e6e0080] = 0xffffffff
+Write [0x1e6e0084] = 0x00000000
+delay 600 us
+Write [0x1e6e0004] = 0x00000017
+Write [0x1e6e0010] = 0x040e0307
+Write [0x1e6e0014] = 0x0f4711f1
+Write [0x1e6e0018] = 0x0e060304
+Write [0x1e6e001c] = 0x00001240
+Write [0x1e6e0020] = 0x03010510
+Write [0x1e6e0024] = 0x00000000
+Write [0x1e6e0028] = 0x04000000
+Write [0x1e6e002c] = 0x00000400
+
+/* DDR-PHY reset assert */
+Write [0x1e6e0060] = 0x00000000
+delay 10 us
+
+/* load DDR-PHY table */
+Write [0x1e6e0100] = 0x00000000
+Write [0x1e6e0104] = 0x0c002062
+Write [0x1e6e0108] = 0x1a7a0063
+Write [0x1e6e010c] = 0x5a7a0063
+Write [0x1e6e0110] = 0x1a7a0063
+Write [0x1e6e0114] = 0x1a7a0063
+Write [0x1e6e0118] = 0x20000000
+Write [0x1e6e011c] = 0x20000000
+Write [0x1e6e0120] = 0x20000000
+Write [0x1e6e0124] = 0x20000000
+Write [0x1e6e0128] = 0x00000008
+Write [0x1e6e012c] = 0x00000000
+Write [0x1e6e0130] = 0x00077600
+Write [0x1e6e0134] = 0x00000000
+Write [0x1e6e0138] = 0x00000000
+Write [0x1e6e013c] = 0x20000000
+Write [0x1e6e0140] = 0x50506000
+Write [0x1e6e0144] = 0x50505050
+Write [0x1e6e0148] = 0x00002f07
+Write [0x1e6e014c] = 0x00003080
+Write [0x1e6e0150] = 0x04000000
+Write [0x1e6e0154] = 0x00000200
+Write [0x1e6e0158] = 0x03140501
+Write [0x1e6e015c] = 0x04800000
+Write [0x1e6e0160] = 0x0800044e
+Write [0x1e6e0164] = 0x00000000
+Write [0x1e6e0168] = 0x00180008
+Write [0x1e6e016c] = 0x00e00400
+Write [0x1e6e0170] = 0x00140206
+Write [0x1e6e0174] = 0x1d4c0000
+Write [0x1e6e0178] = 0x493e0107
+Write [0x1e6e017c] = 0x08060404
+Write [0x1e6e0180] = 0x90000a00
+Write [0x1e6e0184] = 0x06420c30
+Write [0x1e6e0188] = 0x00001002
+Write [0x1e6e018c] = 0x05701016
+Write [0x1e6e0190] = 0x10000000
+Write [0x1e6e019c] = 0x20202020
+Write [0x1e6e01a0] = 0x20202020
+Write [0x1e6e01a4] = 0x00002020
+Write [0x1e6e01a8] = 0x00002020
+Write [0x1e6e01ac] = 0x00000001
+Write [0x1e6e01cc] = 0x01010101
+Write [0x1e6e01d0] = 0x01010101
+Write [0x1e6e01d4] = 0x80808080
+Write [0x1e6e01d8] = 0x80808080
+Write [0x1e6e0288] = 0x80808080
+Write [0x1e6e028c] = 0x80808080
+Write [0x1e6e0290] = 0x80808080
+Write [0x1e6e0294] = 0x80808080
+Write [0x1e6e02f8] = 0x90909090
+Write [0x1e6e02fc] = 0x88888888
+Write [0x1e6e0300] = 0x00000000
+Write [0x1e6e0194] = 0x801112e0
+Write [0x1e6e019c] = 0x20202020
+Write [0x1e6e01a0] = 0x20202020
+Write [0x1e6e01a4] = 0x00002020
+Write [0x1e6e01a8] = 0x80000000
+Write [0x1e6e01ac] = 0x00000001
+Write [0x1e6e0318] = 0x09222719
+Write [0x1e6e031c] = 0x00aa4403
+Write [0x1e6e0198] = 0x08060000
+Write [0x1e6e01b0] = 0x00000000
+Write [0x1e6e01b4] = 0x00000000
+Write [0x1e6e01b8] = 0x00000000
+Write [0x1e6e01bc] = 0x00000000
+Write [0x1e6e01c0] = 0x00000000
+Write [0x1e6e01c4] = 0x00000000
+Write [0x1e6e01c8] = 0x000aff2c
+Write [0x1e6e01dc] = 0x00080000
+Write [0x1e6e01e0] = 0x00000000
+Write [0x1e6e01e4] = 0xaa55aa55
+Write [0x1e6e01e8] = 0x55aa55aa
+Write [0x1e6e01ec] = 0xaaaa5555
+Write [0x1e6e01f0] = 0x5555aaaa
+Write [0x1e6e01f4] = 0xaa55aa55
+Write [0x1e6e01f8] = 0x55aa55aa
+Write [0x1e6e01fc] = 0xaaaa5555
+Write [0x1e6e0200] = 0x5555aaaa
+Write [0x1e6e0204] = 0xaa55aa55
+Write [0x1e6e0208] = 0x55aa55aa
+Write [0x1e6e020c] = 0xaaaa5555
+Write [0x1e6e0210] = 0x5555aaaa
+Write [0x1e6e0214] = 0xaa55aa55
+Write [0x1e6e0218] = 0x55aa55aa
+Write [0x1e6e021c] = 0xaaaa5555
+Write [0x1e6e0220] = 0x5555aaaa
+Write [0x1e6e0224] = 0x20202020
+Write [0x1e6e0228] = 0x20202020
+Write [0x1e6e022c] = 0x20202020
+Write [0x1e6e0230] = 0x20202020
+Write [0x1e6e0234] = 0x20202020
+Write [0x1e6e0238] = 0x20202020
+Write [0x1e6e023c] = 0x20202020
+Write [0x1e6e0240] = 0x20202020
+Write [0x1e6e0244] = 0x20202020
+Write [0x1e6e0248] = 0x20202020
+Write [0x1e6e024c] = 0x20202020
+Write [0x1e6e0250] = 0x20202020
+Write [0x1e6e0254] = 0x20202020
+Write [0x1e6e0258] = 0x20202020
+Write [0x1e6e025c] = 0x20202020
+Write [0x1e6e0260] = 0x20202020
+Write [0x1e6e0264] = 0x20202020
+Write [0x1e6e0268] = 0x20202020
+Write [0x1e6e026c] = 0x20202020
+Write [0x1e6e0270] = 0x20202020
+Write [0x1e6e0298] = 0x20200800
+Write [0x1e6e029c] = 0x20202020
+Write [0x1e6e02a0] = 0x20202020
+Write [0x1e6e02a4] = 0x20202020
+Write [0x1e6e02a8] = 0x20202020
+Write [0x1e6e02ac] = 0x20202020
+Write [0x1e6e02b0] = 0x20202020
+Write [0x1e6e02b4] = 0x20202020
+Write [0x1e6e02b8] = 0x20202020
+Write [0x1e6e02bc] = 0x20202020
+Write [0x1e6e02c0] = 0x20202020
+Write [0x1e6e02c4] = 0x20202020
+Write [0x1e6e02c8] = 0x20202020
+Write [0x1e6e02cc] = 0x20202020
+Write [0x1e6e02d0] = 0x20202020
+Write [0x1e6e02d4] = 0x20202020
+Write [0x1e6e02d8] = 0x20202020
+Write [0x1e6e02dc] = 0x20202020
+Write [0x1e6e02e0] = 0x20202020
+Write [0x1e6e02e4] = 0x20202020
+Write [0x1e6e02e8] = 0x00002020
+Write [0x1e6e0304] = 0x00000800
+Write [0x1e6e027c] = 0x4e400000
+Write [0x1e6e0280] = 0x59595959
+Write [0x1e6e0284] = 0x40404040
+Write [0x1e6e02f4] = 0x00000059
+
+/* modify tRFC */
+Read  [0x1e6e0184] = 0x06420c30
+Write [0x1e6e0184] = 0x06420c30
+
+/* enable CKE, RESETN_DIS */
+Write [0x1e6e0034] = 0x000000c1
+delay 5 us
+
+/* kick DDR-PHY training */
+Write [0x1e6e0060] = 0x00000004
+delay 5 us
+Write [0x1e6e0060] = 0x00000005
+delay 1000 us
+
+/* polling training status */
+Read  [0x1e6e0060] = 0x00000005    ◊ polling MCR60[1]==1
+delay 500 us
+
+/* DLL/ZQCL enable */
+Write [0x1e6e000c] = 0x00000040
+
+/* weird */
+這邊假如delay太久(例如call printf or delay 2000us)的話，會導致DDR init. Fail
+
+/* load MMC AC timing parameters */
+Write [0x1e6e0030] = 0x00000007
+Write [0x1e6e0030] = 0x0000000d
+Write [0x1e6e0030] = 0x0000000b
+Write [0x1e6e0030] = 0x00000009
+Write [0x1e6e0030] = 0x00000005
+Write [0x1e6e0030] = 0x00000003
+Write [0x1e6e0030] = 0x00000011
+
+/* enable refresh */
+Write [0x1e6e000c] = 0x00005f41
+Read  [0x1e6e0034] = 0x800000c1    ◊ polling: bit[30:28] == 3b’000
+Write [0x1e6e000c] = 0x42aa5fa1
+Write [0x1e6e0034] = 0x000007a3
+delay 500 us
+
+/* polling PHY status bit[1] */
+Read  [0x1e6e0400] = 0x0888aa97    ◊ polling: bit[1]==1
+
+/* dump PHY status and check if need for retrain */
+Read  [0x1e6e0400] = 0x0888aa97    ◊ goto /* DDR-PHY reset assert */ if bit[3]==1 | bit[5]==1
+Read  [0x1e6e0430] = 0x000800f7    ◊ debug purpose
+Read  [0x1e6e0468] = 0x0000e1db    ◊ goto /* DDR-PHY reset assert */ if bit[7:0] == 0
+Read  [0x1e6e04c8] = 0x0000e1de    ◊ debug purpose
+Read  [0x1e6e047c] = 0x0000dede    ◊ goto /* DDR-PHY reset assert */ if bit[7:0] == 0
+Read  [0x1e6e0488] = 0x5959595c    ◊ debug purpose
+Read  [0x1e6e0490] = 0x0000002b    ◊ debug purpose
+Read  [0x1e6e0450] = 0x021503ec    ◊ goto /* DDR-PHY reset assert */ if bit[31:16] == 0 | bit[15:0] == 0
+
+/* calculate size */
+Write [0xc0100000] = 0xdeadbeef
+Write [0xa0100000] = 0xfdeadbee
+Write [0x90100000] = 0xefdeadbe
+Write [0x80100000] = 0xeefdeadb
+Read  [0xc0100000] = 0xeefdeadb    ◊ if value of 0xC010_000 == 0xdeadbeef, then size=2GB, else check next point
+Read  [0xa0100000] = 0xfdeadbee    ◊ if value of 0xA010_000 == 0xfdeadbee, then size=1GB, else check next point
+Read  [0x90100000] = not executed  ◊ if value of 0x9010_000 == 0xefdeadbe, then size=512MB, else check next point
+Read  [0x80100000] = not executed ◊ if value of 0x8010_000 == 0xeefdeadb, then size=256MB
+
+Read  [0x1e6e0014] = 0x0f4711f1    ◊ read-modify-write MCR14[7:0]: set refresh timing according to the size
+Write [0x1e6e0014] = 0x0f471199    ◊ DDR1600 TRFC parameter = 0x467299f1
+	2GB: 0xF1, 1GB: 0x99, 512MB:0x72, 256MB: 0x46
+Read  [0x1e6e2500] = 0x00000000    ◊ check strap: SCU500[14:13]
+Read  [0x1e6e0004] = 0x30000017
+Write [0x1e6e0004] = 0x30000017    ◊ read-modify-write: MCR04[3:2] VGA size according to SCU500[14:13]
+Read  [0x1e6e0004] = 0x30000017
+Write [0x1e6e0004] = 0x30000016    ◊ read-modify-write: MCR04[1:0] SDRAM capacity (size)
+
+/* calibration test */
+Write [0x1e6e007c] = 0xcc33cc33
+Read  [0x1e6e0074] = 0x80000001
+Write [0x1e6e0074] = 0x807ffff1    ◊ read-modify-write MCR74[30:4]
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00001085    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000108d    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00001095    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000109d    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000010a5    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000010ad    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000010b5    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000010bd    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00001085    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000c9
+Read  [0x1e6e0070] = 0x000000c9
+Read  [0x1e6e0070] = 0x000000c9
+Read  [0x1e6e0070] = 0x000000c9
+Read  [0x1e6e0070] = 0x000010c9    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000d1
+Read  [0x1e6e0070] = 0x000000d1
+Read  [0x1e6e0070] = 0x000000d1
+Read  [0x1e6e0070] = 0x000000d1
+Read  [0x1e6e0070] = 0x000010d1    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000d9
+Read  [0x1e6e0070] = 0x000000d9
+Read  [0x1e6e0070] = 0x000000d9
+Read  [0x1e6e0070] = 0x000000d9
+Read  [0x1e6e0070] = 0x000010d9
+Write [0x1e6e0070] = 0x00000000    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000e1
+Read  [0x1e6e0070] = 0x000000e1
+Read  [0x1e6e0070] = 0x000000e1
+Read  [0x1e6e0070] = 0x000000e1
+Read  [0x1e6e0070] = 0x000010e1    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000e9
+Read  [0x1e6e0070] = 0x000000e9
+Read  [0x1e6e0070] = 0x000000e9
+Read  [0x1e6e0070] = 0x000000e9
+Read  [0x1e6e0070] = 0x000010e9    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000f1
+Read  [0x1e6e0070] = 0x000000f1
+Read  [0x1e6e0070] = 0x000000f1
+Read  [0x1e6e0070] = 0x000000f1
+Read  [0x1e6e0070] = 0x000010f1    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000f9
+Read  [0x1e6e0070] = 0x000000f9
+Read  [0x1e6e0070] = 0x000000f9
+Read  [0x1e6e0070] = 0x000000f9
+Read  [0x1e6e0070] = 0x000010f9    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e007c] = 0xff00ff00
+Read  [0x1e6e0074] = 0x807ffff1
+Write [0x1e6e0074] = 0x807ffff1
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00001085    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000008d
+Read  [0x1e6e0070] = 0x0000108d    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00000095
+Read  [0x1e6e0070] = 0x00001095    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000009d
+Read  [0x1e6e0070] = 0x0000109d    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000000a5
+Read  [0x1e6e0070] = 0x000010a5    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000000ad
+Read  [0x1e6e0070] = 0x000010ad    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000000b5
+Read  [0x1e6e0070] = 0x000010b5    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000000bd
+Read  [0x1e6e0070] = 0x000010bd    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00000085
+Read  [0x1e6e0070] = 0x00001085    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000c9
+Read  [0x1e6e0070] = 0x000000c9
+Read  [0x1e6e0070] = 0x000000c9
+Read  [0x1e6e0070] = 0x000000c9
+Read  [0x1e6e0070] = 0x000010c9    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000d1
+Read  [0x1e6e0070] = 0x000000d1
+Read  [0x1e6e0070] = 0x000000d1
+Read  [0x1e6e0070] = 0x000000d1
+Read  [0x1e6e0070] = 0x000010d1    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000d9
+Read  [0x1e6e0070] = 0x000000d9
+Read  [0x1e6e0070] = 0x000000d9
+Read  [0x1e6e0070] = 0x000000d9
+Read  [0x1e6e0070] = 0x000010d9    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000e1
+Read  [0x1e6e0070] = 0x000000e1
+Read  [0x1e6e0070] = 0x000000e1
+Read  [0x1e6e0070] = 0x000000e1
+Read  [0x1e6e0070] = 0x000010e1    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000e9
+Read  [0x1e6e0070] = 0x000000e9
+Read  [0x1e6e0070] = 0x000000e9
+Read  [0x1e6e0070] = 0x000000e9
+Read  [0x1e6e0070] = 0x000010e9    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000f1
+Read  [0x1e6e0070] = 0x000000f1
+Read  [0x1e6e0070] = 0x000000f1
+Read  [0x1e6e0070] = 0x000000f1
+Read  [0x1e6e0070] = 0x000010f1    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x00000000
+Write [0x1e6e0070] = 0x000000f9
+Read  [0x1e6e0070] = 0x000000f9
+Read  [0x1e6e0070] = 0x000000f9
+Read  [0x1e6e0070] = 0x000000f9
+Read  [0x1e6e0070] = 0x000010f9    ◊ polling MCR70[13:12]: 2b’1x=fail 2b’01: finish and pass
+Write [0x1e6e0070] = 0x00000000
+
+/* clear interrupt status */
+Read  [0x1e6e2100] = 0x00000000
+Write [0x1e6e2100] = 0x00000040
+
+/* lock MMC */
+Write [0x1e6e0000] = 0x039ffcf6
+Read  [0x1e6e0000] = 0x00000000    ◊ polling MCR00==0
+
