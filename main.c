@@ -369,19 +369,19 @@ int main()
 
 	/* copy CM3 bootcode */
 	ptr = log_jeq(ptr, SBC_BASE + OTP_QSR, BIT(26), BIT(26), "l_copy_from_sram");
-	ptr = cp_code(ptr, SPI_BASE, DRAM_BASE, 64 * 1024 / sizeof(uint32_t));
+	ptr = cp_code(ptr, SPI_BASE + sizeof(rom_code), DRAM_BASE, 64 * 1024 / sizeof(uint32_t));
 	ptr = log_jmp(ptr, "l_copy_done");
 	log_label(ptr, "l_copy_from_sram");	
-	ptr = cp_code(ptr, SRAM_BASE, DRAM_BASE, 64 * 1024 / sizeof(uint32_t));
+	ptr = cp_code(ptr, SRAM_BASE + sizeof(rom_code), DRAM_BASE, 64 * 1024 / sizeof(uint32_t));
 	log_label(ptr, "l_copy_done");
 	
 	/* enable CM3 */
 	ptr = wr_single(ptr, SCU_BASE + 0xa00, 0);
-	ptr = wr_single(ptr, SCU_BASE + 0xa04, 0x80000000);
+	ptr = wr_single(ptr, SCU_BASE + 0xa04, DRAM_BASE);
 	ptr = wr_single(ptr, SCU_BASE + 0xa48, 3);
 	ptr = wr_single(ptr, SCU_BASE + 0xa48, 1);
-	ptr = wr_single(ptr, SCU_BASE + 0xa08, 0x80100000);
-	ptr = wr_single(ptr, SCU_BASE + 0xa0c, 0x80200000);
+	ptr = wr_single(ptr, SCU_BASE + 0xa08, DRAM_BASE + 0x00100000);
+	ptr = wr_single(ptr, SCU_BASE + 0xa0c, DRAM_BASE + 0x00200000);
 	ptr = wr_single(ptr, SCU_BASE + 0xa00, 2);
 	ptr = delay_code(ptr, 500);
 	ptr = wr_single(ptr, SCU_BASE + 0xa00, 0);
