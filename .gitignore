@@ -2,3 +2,6 @@
 *.bin
 rom_patch
 rom_patch.bin
+GPATH
+GRTAGS
+GTAGS
