@@ -1,3 +1,8 @@
+#ifndef _AST2600_H_
+#define _AST2600_H_
+
+#include "config.h"
+
 #define SCU_BASE 			0x1e6e2000
 #define MPLL_REG 			(SCU_BASE + 0x220)
 #define MPLL_EXT_REG 		(SCU_BASE + 0x224)
@@ -19,3 +24,5 @@
 #define SRAM1_BASE			0x10010000	/* 24KB */
 #define SPI_BASE			0x20000000
 #define DRAM_BASE			CONFIG_SYS_SDRAM_BASE
+
+#endif /* end of "ifndef _AST2600_H_" */

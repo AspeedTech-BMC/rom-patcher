@@ -1,3 +1,5 @@
+#ifndef _OPCODE_H_
+#define _OPCODE_H_
 #include <stdint.h>
 #include <stdio.h>
 
@@ -84,3 +86,5 @@ void log_jmp(FILE *fp, char *label_name);
 void print_labels(void);
 void link_labels(FILE *fp);
 void print_rom_patch(FILE *fp);
+
+#endif /* end of "ifndef _OPCODE_H_" */
