@@ -37,58 +37,49 @@ int main()
     wr_single(fp, MMC_BASE, MMC_UNLOCK_KEY);
     waiteq_code(fp, MMC_BASE, BIT(0), BIT(0), 1);
 
+	sdrammc_common_init(fp);
+    log_label(fp, "l_sdramphy_train");
+	sdrammc_init_ddr4(fp);
+
+#if defined(CONFIG_FPGA_ASPEED) || defined(CONFIG_ASPEED_PALLADIUM)
+	sdrammc_search_read_window(fp);
+#else
+	waiteq_code(fp, PHY_BASE + 0x300, BIT(1), BIT(1), 1);
+	sdramphy_check_status(fp);
+#endif
+
     log_label(fp, "l_calc_size");
-    sdrammc_calc_size(fp);
+	sdrammc_calc_size(fp);
 
     /* set handshake bits */
     setbit_code(fp, SCU_BASE + 0x100, BIT(7) | BIT(6));
     quit_code(fp);
-    //fclose(fp);
-
 
 #if 0
-
-    ptr = sdrammc_common_init(ptr);
-    log_label(ptr, "l_sdramphy_train");
-	ptr = sdrammc_init_ddr4(ptr);
-#if defined(CONFIG_FPGA_ASPEED) || defined(CONFIG_ASPEED_PALLADIUM)
-	ptr = sdrammc_search_read_window(ptr);
-#else
-	ptr = waiteq_code(ptr, PHY_BASE + 0x300, BIT(1), BIT(1), 1);
-	ptr = sdramphy_check_status(ptr);
-#endif
-    log_label(ptr, "l_calc_size");
-	ptr = sdrammc_calc_size(ptr);
-
-	/* set handshake bits */
-	ptr = setbit_code(ptr, SCU_BASE + 0x100, BIT(7) | BIT(6));
-
 	/* copy CM3 bootcode */
 	cm3_bin_offset = SB_HDR_SIZE_BYTE + sizeof(rom_code);
-	ptr = log_jeq(ptr, SBC_BASE + OTP_QSR, BIT(26), BIT(26), "l_copy_from_sram");
-	ptr = cp_code(ptr, SPI_BASE + cm3_bin_offset, DRAM_BASE, CM3_BIN_SIZE_DW);
-	ptr = log_jmp(ptr, "l_copy_done");
+	log_jeq(ptr, SBC_BASE + OTP_QSR, BIT(26), BIT(26), "l_copy_from_sram");
+	cp_code(ptr, SPI_BASE + cm3_bin_offset, DRAM_BASE, CM3_BIN_SIZE_DW);
+	log_jmp(ptr, "l_copy_done");
 	log_label(ptr, "l_copy_from_sram");	
-	ptr = cp_code(ptr, SRAM_BASE + cm3_bin_offset, DRAM_BASE, CM3_BIN_SIZE_DW);
+	cp_code(ptr, SRAM_BASE + cm3_bin_offset, DRAM_BASE, CM3_BIN_SIZE_DW);
 	log_label(ptr, "l_copy_done");
 	
 	/* enable CM3 */
-	ptr = wr_single(ptr, SCU_BASE + 0xa00, 0);
-	ptr = wr_single(ptr, SCU_BASE + 0xa04, DRAM_BASE);
-	ptr = wr_single(ptr, SCU_BASE + 0xa48, 3);
-	ptr = wr_single(ptr, SCU_BASE + 0xa48, 1);
-	ptr = wr_single(ptr, SCU_BASE + 0xa08, DRAM_BASE + 0x00100000);
-	ptr = wr_single(ptr, SCU_BASE + 0xa0c, DRAM_BASE + 0x00200000);
-	ptr = wr_single(ptr, SCU_BASE + 0xa00, 2);
-	ptr = delay_code(ptr, 500);
-	ptr = wr_single(ptr, SCU_BASE + 0xa00, 0);
-	ptr = wr_single(ptr, SCU_BASE + 0xa00, 1);
+	wr_single(fp, SCU_BASE + 0xa00, 0);
+	wr_single(fp, SCU_BASE + 0xa04, DRAM_BASE);
+	wr_single(fp, SCU_BASE + 0xa48, 3);
+	wr_single(fp, SCU_BASE + 0xa48, 1);
+	wr_single(fp, SCU_BASE + 0xa08, DRAM_BASE + 0x00100000);
+	wr_single(fp, SCU_BASE + 0xa0c, DRAM_BASE + 0x00200000);
+	wr_single(fp, SCU_BASE + 0xa00, 2);
+	delay_code(fp, 500);
+	wr_single(fp, SCU_BASE + 0xa00, 0);
+	wr_single(fp, SCU_BASE + 0xa00, 1);
     /* ---------- end ---------- */
-    log_label(ptr, "l_end");
-    ptr = quit_code(ptr);
+    log_label(fp, "l_end");
 #endif
 
-    
 	print_labels();
 	link_labels(fp);
 	print_rom_patch(fp);
