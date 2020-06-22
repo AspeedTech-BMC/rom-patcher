@@ -15,14 +15,16 @@ struct sb_header {
 };
 
 struct cm3_image {
+	uint32_t magic;
 	uint32_t addr;				/* byte address */
 	uint32_t size_dw;			/* size is in uint32_t */
 };
 
 // SPI Flash layout
-// 0000 - 001F: reserved for ARM Cortex A7
-// 0020 - 003F: secure boot header
-// 0040 ~     : ROM patch
+// 2000_0000 - 2000_001F: reserved for ARM Cortex A7
+// 2000_0020 - 2000_003F: secure boot header
+// 2000_0040 ~          : ROM patch
+
 void copy_cm3(FILE *fp)
 {
 	/* copy CM3 bootcode */
@@ -35,6 +37,7 @@ void copy_cm3(FILE *fp)
 	log_label(fp, "l_copy_done");
 	
 }
+
 void enable_cm3(FILE *fp)
 {
 	wr_single(fp, SCU_BASE + 0xa00, 0);
