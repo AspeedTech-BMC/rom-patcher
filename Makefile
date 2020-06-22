@@ -1,2 +1,2 @@
 all:
-	gcc opcode.c main.c -o rom_patch
+	gcc opcode.c ddr4_init.c main.c -o rom_patch
