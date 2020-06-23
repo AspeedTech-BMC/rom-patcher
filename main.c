@@ -6,6 +6,7 @@
 #include "ast2600.h"
 #include "ddr4_init.h"
 #include "bootloader.h"
+
 /**
  *                 0000_0000 +--------------------+
  *                           | ARM CA7 code
@@ -36,22 +37,22 @@ int main()
 	uint32_t size;
     int i, j;
 
-	fp = fopen("rom_patch.bin", "wb+");
+	fp = fopen(OUTPUT_BIN_NAME, "wb+");
 	if (!fp) {
-	    printf("can not open dest file: rom_patch.bin\n");
+	    printf("can not open dest file: %s\n", OUTPUT_BIN_NAME);
 	    return -1;
 	}
 	fseek(fp, 0, SEEK_SET);
 
     /* ---------- start ---------- */ 
 	start_code(fp);
-	log_jmp(fp, "l_start");
+	jmp_code(fp, "l_start");
 	fgetpos(fp, &cm3_img_start);
-	attach_cm3_code(fp);
+	attach_cm3_binary(fp);
 	
-	log_label(fp, "l_start");
+	declare_label(fp, "l_start");
 	/* goto l_calc_size if DRAM is already initialized */
-    log_jeq(fp, SCU_BASE + 0x100, BIT(6), BIT(6), "l_calc_size");
+    jeq_code(fp, SCU_BASE + 0x100, BIT(6), BIT(6), "l_calc_size");
 
 	/* set MPLL */
     rmw_code(fp, MPLL_REG, ~(BIT(24) | GENMASK(22, 0)),
@@ -67,7 +68,7 @@ int main()
 
 	/* DDR4 init start */
 	sdrammc_common_init(fp);
-    log_label(fp, "l_sdramphy_train");
+    declare_label(fp, "l_sdramphy_train");
 	sdrammc_init_ddr4(fp);
 
 #if defined(CONFIG_FPGA_ASPEED) || defined(CONFIG_ASPEED_PALLADIUM)
@@ -77,7 +78,7 @@ int main()
 	sdramphy_check_status(fp);
 #endif
 
-    log_label(fp, "l_calc_size");
+    declare_label(fp, "l_calc_size");
 	sdrammc_calc_size(fp);
 
     /* DDR4 init end: set handshake bits */

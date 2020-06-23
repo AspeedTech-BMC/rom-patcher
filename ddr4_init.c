@@ -78,20 +78,20 @@ void sdramphy_kick_training(FILE *fp)
 void sdramphy_check_status(FILE *fp)
 {
 #if !defined(CONFIG_FPGA_ASPEED) && !defined(CONFIG_ASPEED_PALLADIUM)
-	log_jeq(fp, PHY_STS_BASE + 0x00, BIT(3), BIT(3), "l_sdramphy_train");
-	log_jeq(fp, PHY_STS_BASE + 0x00, BIT(5), BIT(5), "l_sdramphy_train");
+	jeq_code(fp, PHY_STS_BASE + 0x00, BIT(3), BIT(3), "l_sdramphy_train");
+	jeq_code(fp, PHY_STS_BASE + 0x00, BIT(5), BIT(5), "l_sdramphy_train");
 
 	/* retrain if PHY_STS068[7:0] == 0 */
-	log_jeq(fp, PHY_STS_BASE + 0x68, GENMASK(7, 0), 0, "l_sdramphy_train");
+	jeq_code(fp, PHY_STS_BASE + 0x68, GENMASK(7, 0), 0, "l_sdramphy_train");
 
 	/* retrain if PHY_STS07c[7:0] == 0 */
-	log_jeq(fp, PHY_STS_BASE + 0x7c, GENMASK(7, 0), 0, "l_sdramphy_train");
+	jeq_code(fp, PHY_STS_BASE + 0x7c, GENMASK(7, 0), 0, "l_sdramphy_train");
 
 	/* retrain if PHY_STS050[15:0] == 0 */
-	log_jeq(fp, PHY_STS_BASE + 0x50, GENMASK(15, 0), 0, "l_sdramphy_train");
+	jeq_code(fp, PHY_STS_BASE + 0x50, GENMASK(15, 0), 0, "l_sdramphy_train");
 
 	/* retrain if PHY_STS050[31:16] == 0 */
-	log_jeq(fp, PHY_STS_BASE + 0x50, GENMASK(31, 16), 0, "l_sdramphy_train");
+	jeq_code(fp, PHY_STS_BASE + 0x50, GENMASK(31, 16), 0, "l_sdramphy_train");
 #endif	
 	
 }
@@ -172,16 +172,16 @@ void sdrammc_search_read_window(FILE *fp)
 	wr_single(fp, SEARCH_RDWIN_ANCHOR_0, SEARCH_RDWIN_PTRN_0);
     wr_single(fp, SEARCH_RDWIN_ANCHOR_1, SEARCH_RDWIN_PTRN_1);
 	wr_single(fp, PHY_BASE + 0x00, 0x0000000c);
-	log_label(fp, "l_check_value_start");
+	declare_label(fp, "l_check_value_start");
 	sdrammc_fpga_set_pll(fp);
-	log_jeq(fp, SEARCH_RDWIN_ANCHOR_0, GENMASK(31, 0), SEARCH_RDWIN_PTRN_0, "l_check_value_start");
-	log_jeq(fp, SEARCH_RDWIN_ANCHOR_1, GENMASK(31, 0), SEARCH_RDWIN_PTRN_1, "l_check_value_start");
+	jeq_code(fp, SEARCH_RDWIN_ANCHOR_0, GENMASK(31, 0), SEARCH_RDWIN_PTRN_0, "l_check_value_start");
+	jeq_code(fp, SEARCH_RDWIN_ANCHOR_1, GENMASK(31, 0), SEARCH_RDWIN_PTRN_1, "l_check_value_start");
 
 	wr_single(fp, var_win, 0);
-	log_label(fp, "l_cali_rd_win_start");
+	declare_label(fp, "l_cali_rd_win_start");
 	sdrammc_fpga_set_pll(fp);
 	add_code(fp, var_win, 1);
-	log_jne(fp, var_win, GENMASK(31, 0), 256, "l_cali_rd_win_start");
+	jne_code(fp, var_win, GENMASK(31, 0), 256, "l_cali_rd_win_start");
 #endif
 	
 }
@@ -193,48 +193,48 @@ void sdrammc_calc_size(FILE *fp)
 	wr_single(fp, 0x90100000, 0xefdeadbe);
 	wr_single(fp, 0x80100000, 0xeefdeadb);
 
-	log_jeq(fp, 0xc0100000, GENMASK(31, 0), 0xdeadbeef, "l_size_2g");
-	log_jeq(fp, 0xa0100000, GENMASK(31, 0), 0xfdeadbee, "l_size_1g");
-	log_jeq(fp, 0x90100000, GENMASK(31, 0), 0xefdeadbe, "l_size_512m");
+	jeq_code(fp, 0xc0100000, GENMASK(31, 0), 0xdeadbeef, "l_size_2g");
+	jeq_code(fp, 0xa0100000, GENMASK(31, 0), 0xfdeadbee, "l_size_1g");
+	jeq_code(fp, 0x90100000, GENMASK(31, 0), 0xefdeadbe, "l_size_512m");
 	
-	//log_label(fp, "l_size_256m");
+	//declare_label(fp, "l_size_256m");
 	rmw_code(fp, MMC_BASE + 0x04, ~GENMASK(1, 0), 0x0);
-	log_jmp(fp, "l_size_done_0");
+	jmp_code(fp, "l_size_done_0");
 
-	log_label(fp, "l_size_2g");
+	declare_label(fp, "l_size_2g");
 	rmw_code(fp, MMC_BASE + 0x04, ~GENMASK(1, 0), 0x3);
-	log_jmp(fp, "l_size_done_0");
+	jmp_code(fp, "l_size_done_0");
 
-	log_label(fp, "l_size_1g");
+	declare_label(fp, "l_size_1g");
 	rmw_code(fp, MMC_BASE + 0x04, ~GENMASK(1, 0), 0x2);
-	log_jmp(fp, "l_size_done_0");
+	jmp_code(fp, "l_size_done_0");
 
-	log_label(fp, "l_size_512m");
+	declare_label(fp, "l_size_512m");
 	rmw_code(fp, MMC_BASE + 0x04, ~GENMASK(1, 0), 0x1);
 	//jmp_code(fp, "l_size_done");
 
 /* l_size_done_0 */
-	log_label(fp, "l_size_done_0");
+	declare_label(fp, "l_size_done_0");
 
 	/* check VGA size: read SCU500[14:13] and write MMC04[3:2] */
-	log_jeq(fp, STRAP_REG, GENMASK(14, 13), 0x3 << 13, "l_vga_size_64m");
-	log_jeq(fp, STRAP_REG, GENMASK(14, 13), 0x2 << 13, "l_vga_size_32m");
-	log_jeq(fp, STRAP_REG, GENMASK(14, 13), 0x1 << 13, "l_vga_size_16m");
+	jeq_code(fp, STRAP_REG, GENMASK(14, 13), 0x3 << 13, "l_vga_size_64m");
+	jeq_code(fp, STRAP_REG, GENMASK(14, 13), 0x2 << 13, "l_vga_size_32m");
+	jeq_code(fp, STRAP_REG, GENMASK(14, 13), 0x1 << 13, "l_vga_size_16m");
 
 	// VGA 8MB -> set to 16MB
 	setbit_code(fp, STRAP_REG, 0x1 << 13);
-	log_label(fp, "l_vga_size_16m");
+	declare_label(fp, "l_vga_size_16m");
 	rmw_code(fp, MMC_BASE + 0x04, ~GENMASK(3, 2), 0x1 << 2);
-	log_jmp(fp, "l_size_done_1");
+	jmp_code(fp, "l_size_done_1");
 
-	log_label(fp, "l_vga_size_32m");
+	declare_label(fp, "l_vga_size_32m");
 	rmw_code(fp, MMC_BASE + 0x04, ~GENMASK(3, 2), 0x2 << 2);
-	log_jmp(fp, "l_size_done_1");
+	jmp_code(fp, "l_size_done_1");
 
-	log_label(fp, "l_vga_size_64m");
+	declare_label(fp, "l_vga_size_64m");
 	rmw_code(fp, MMC_BASE + 0x04, ~GENMASK(3, 2), 0x3 << 2);
-	log_jmp(fp, "l_size_done_1");
+	jmp_code(fp, "l_size_done_1");
 /* l_size_done_1 */
-	log_label(fp, "l_size_done_1");
+	declare_label(fp, "l_size_done_1");
 	
 }

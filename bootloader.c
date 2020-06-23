@@ -27,18 +27,23 @@ struct cm3_image_header {
 // 2000_0040 ~          : ROM patch
 uint32_t get_cm3_bin_size(void)
 {
-	FILE *bin;
+	FILE *fb;
 	uint32_t size = 0;
 
-	bin = fopen("ast2600_ssp.bin", "rb");
-	fseek(bin, 0, SEEK_END);
-	size = ftell(bin);
-	fclose(bin);
+	fb = fopen(CM3_BIN_NAME, "rb");
+	if (!fb) {
+	    printf("can not open cm3 bin file: %s\n", CM3_BIN_NAME);
+		return 0;
+	}
+
+	fseek(fb, 0, SEEK_END);
+	size = ftell(fb);
+	fclose(fb);
 
 	return size;
 }
 
-void attach_cm3_code(FILE *fp)
+void attach_cm3_binary(FILE *fp)
 {
 	struct cm3_image_header hdr;
 	FILE *fb;
@@ -53,7 +58,11 @@ void attach_cm3_code(FILE *fp)
 	hdr.size_dw = (get_cm3_bin_size() + 0x3) >> 2;
 	fwrite(&hdr, 1, sizeof(hdr), fp);
 
-	fb = fopen("ast2600_ssp.bin", "rb");
+	fb = fopen(CM3_BIN_NAME, "rb");
+	if (!fb) {
+	    printf("can not open cm3 bin file: %s\n", CM3_BIN_NAME);
+		return;
+	}
 	fseek(fb, 0, SEEK_SET);
 
 	while (fread(&data, 1, sizeof(data), fb)) {
@@ -84,12 +93,12 @@ void copy_cm3(FILE *fp, fpos_t start)
 	fsetpos(fp, &fp_cur);
 
 	/* copy CM3 bootcode */
-	log_jeq(fp, SBC_BASE + OTP_QSR, BIT(26), BIT(26), "l_copy_from_sram");
+	jeq_code(fp, SBC_BASE + OTP_QSR, BIT(26), BIT(26), "l_copy_from_sram");
 	cp_code(fp, SPI_BASE + hdr.src, hdr.dst, hdr.size_dw);
-	log_jmp(fp, "l_copy_done");
-	log_label(fp, "l_copy_from_sram");	
+	jmp_code(fp, "l_copy_done");
+	declare_label(fp, "l_copy_from_sram");	
 	cp_code(fp, SRAM_BASE + hdr.src, hdr.dst, hdr.size_dw);
-	log_label(fp, "l_copy_done");
+	declare_label(fp, "l_copy_done");
 	
 }
 

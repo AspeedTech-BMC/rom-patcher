@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define START_CODE	0x1eadc0de
-#define TICKS_PER_US	(1000 / 40)
+#define START_CODE			0x1eadc0de
+#define TICKS_PER_US		(1000 / 40)
 
 typedef union rom_op_cmd_s {
 	struct {
@@ -67,8 +67,6 @@ void wr_code(FILE *fp, uint32_t addr, uint32_t length, uint32_t *data);
 void wr_single(FILE *fp, uint32_t addr, uint32_t value);
 void waiteq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, uint32_t delay);
 void waitne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, uint32_t delay);
-void jeq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, int32_t offset);
-void jne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, int32_t offset);
 void delay_code(FILE *fp, uint32_t delay);
 void rmw_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t value);
 void clrbit_code(FILE *fp, uint32_t addr, uint32_t value);
@@ -76,12 +74,12 @@ void setbit_code(FILE *fp, uint32_t addr, uint32_t value);
 void add_code(FILE *fp, uint32_t addr, uint32_t value);
 void cp_code(FILE *fp, uint32_t src, uint32_t dst, uint32_t size_dw);
 
-void log_label(FILE *fp, char *name);
-void log_jeq(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
+void declare_label(FILE *fp, char *name);
+void jeq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
 		  char *label_name);
-void log_jne(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
+void jne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
 		  char *label_name);
-void log_jmp(FILE *fp, char *label_name);
+void jmp_code(FILE *fp, char *label_name);
 
 void print_labels(void);
 void link_labels(FILE *fp);

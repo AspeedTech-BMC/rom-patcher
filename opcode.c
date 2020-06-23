@@ -57,7 +57,7 @@ void waitne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, uint32
 	fwrite(&code, 1, sizeof(code), fp);
 }
 
-void jeq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, int32_t offset)
+void _jeq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, int32_t offset)
 {
 	rom_op_jmp_t code = {.cmd.b.cmd = 0xc};
 
@@ -68,7 +68,7 @@ void jeq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, int32_t o
 	fwrite(&code, 1, sizeof(code), fp);
 }
 
-void jne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, int32_t offset)
+void _jne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, int32_t offset)
 {
 	rom_op_jmp_t code = {.cmd.b.cmd = 0xd};
 
@@ -152,10 +152,10 @@ typedef struct rom_lables_s {
     int count;
 } rom_labels_t;
 
-typedef struct log_jmp_s {
+typedef struct jmp_code_s {
     label_t jmps[N_LABEL];
     int count;
-} log_jmp_t;
+} jmp_code_t;
 /* log "jump" instructions */
 
 /**
@@ -163,9 +163,9 @@ typedef struct log_jmp_s {
 */
 rom_labels_t rom_labels = { .count = 0 };
 
-log_jmp_t jmp_list = { .count = 0 };
+jmp_code_t jmp_list = { .count = 0 };
 
-void log_label(FILE *fp, char *name)
+void declare_label(FILE *fp, char *name)
 {
     label_t *lab = &rom_labels.labels[rom_labels.count++];
 
@@ -173,7 +173,7 @@ void log_label(FILE *fp, char *name)
     fgetpos(fp, &lab->position);
 }
 
-void log_jeq(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
+void jeq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
 		  char *label_name)
 {
 	label_t *jmp = &jmp_list.jmps[jmp_list.count++];
@@ -183,10 +183,10 @@ void log_jeq(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
 
 	printf("[%08llx] jeq to %s\n", jmp->position, jmp->name);
 
-    jeq_code(fp, addr, mask, target, 0);
+    _jeq_code(fp, addr, mask, target, 0);
 }
 
-void log_jne(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
+void jne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
 		  char *label_name)
 {
     label_t *jmp = &jmp_list.jmps[jmp_list.count++];
@@ -196,10 +196,10 @@ void log_jne(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
 
 	printf("[%08llx] jne to %s\n", jmp->position, jmp->name);
 
-    jne_code(fp, addr, mask, target, 0);
+    _jne_code(fp, addr, mask, target, 0);
 }
 
-void log_jmp(FILE *fp, char *label_name)
+void jmp_code(FILE *fp, char *label_name)
 {
     label_t *jmp = &jmp_list.jmps[jmp_list.count++];
 
@@ -209,7 +209,7 @@ void log_jmp(FILE *fp, char *label_name)
 	printf("[%08llx] jmp to %s\n", jmp->position, jmp->name);
 
 	/* trick: assert CHIP_ID != 0 */
-    jne_code(fp, SCU_BASE + 0x4, 0, 0xffffffff, 0);
+    _jne_code(fp, SCU_BASE + 0x4, 0, 0xffffffff, 0);
 }
 
 void print_labels(void)
