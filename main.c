@@ -70,6 +70,27 @@ void gen_test_bin(void)
 	fclose(fp);
 	fclose(fb);
 }
+
+void parse_test_bin(void)
+{
+	FILE *fp;
+	struct sb_header sbh;
+
+	fp = fopen("test.bin", "rb");
+	fseek(fp, 0x20, SEEK_CUR);
+
+	fread(&sbh, 1, sizeof(sbh), fp);
+	if (sbh.patch_location == 0) {
+		printf("%s: no rom patch\n", __func__);
+		fclose(fp);
+		return;
+	}
+
+	printf("%s: secure boot header-> patch address %08x, size %08x\n", __func__, sbh.patch_location, sbh.img_size);
+	fseek(fp, sbh.patch_location, SEEK_SET);
+	parse_opcode(fp);
+	fclose(fp);
+}
 /**
  *                 0000_0000 +--------------------+
  *                           | ARM CA7 code
@@ -116,40 +137,7 @@ int main()
 	attach_cm3_binary(fp);
 	
 	declare_label(fp, "l_start");
-	/* goto l_calc_size if DRAM is already initialized */
-    jeq_code(fp, SCU_BASE + 0x100, BIT(6), BIT(6), "l_calc_size");
-	uart_putc(fp, '2');
-	/* set MPLL */
-    rmw_code(fp, MPLL_REG, ~(BIT(24) | GENMASK(22, 0)),
-	     BIT(25) | BIT(23) | MPLL_FREQ_400M);
-    wr_single(fp, MPLL_EXT_REG, MPLL_EXT_400M);
-    delay_code(fp, 100);
-    rmw_code(fp, MPLL_REG, GENMASK(31, 0), ~(BIT(25) | BIT(23)));
-    waiteq_code(fp, MPLL_EXT_REG, BIT(31), BIT(31), 1);
-	uart_putc(fp, '3');
-	/* ast2600_sdrammc_unlock */
-    wr_single(fp, MMC_BASE, MMC_UNLOCK_KEY);
-    waiteq_code(fp, MMC_BASE, BIT(0), BIT(0), 1);
-
-	/* DDR4 init start */
-	sdrammc_common_init(fp);
-    declare_label(fp, "l_sdramphy_train");
-	sdrammc_init_ddr4(fp);
-
-#if defined(CONFIG_FPGA_ASPEED) || defined(CONFIG_ASPEED_PALLADIUM)
-	sdrammc_search_read_window(fp);
-#else
-	waiteq_code(fp, PHY_BASE + 0x300, BIT(1), BIT(1), 1);
-	sdramphy_check_status(fp);
-#endif
-	uart_putc(fp, '4');
-
-    declare_label(fp, "l_calc_size");
-	sdrammc_calc_size(fp);
-
-    /* DDR4 init end: set handshake bits */
-    setbit_code(fp, SCU_BASE + 0x100, BIT(7) | BIT(6));
-	uart_putc(fp, '5');
+	sdram_probe(fp);
 	/* download and enable CM3 */
 	copy_cm3(fp, cm3_img_start);
 	enable_cm3(fp);
@@ -167,5 +155,8 @@ int main()
 
 	fclose(fp);	
 
+	/* test: generate whole SPI boot image */
 	gen_test_bin();
+	parse_test_bin();
+	return 0;
 }

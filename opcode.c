@@ -282,3 +282,48 @@ void print_rom_patch(FILE *fp)
 
 	printf("total size: %d bytes\n", size);
 }
+
+void parse_wr_code(FILE *fp)
+{
+    rom_op_wr_t code;
+    uint32_t data;
+    int i;
+    
+	fread(&code, 1, sizeof(code), fp);
+    printf("write command: addr %08x, value ", code.addr);
+
+    for (i = 0; i <= code.cmd.b.num; i++) {
+		fread(&data, 1, sizeof(data), fp);
+		printf("%08x ", data);
+    }
+    printf("\n");
+}
+void parse_opcode(FILE *fp)
+{
+	uint32_t data;
+	rom_op_cmd_t code;
+	fpos_t pos;
+
+	fread(&data, 1, sizeof(uint32_t), fp);
+	if (data != START_CODE) {
+		printf("start code not found\n");
+		return;
+	}
+
+	while (1) {
+	    fread(&code, 1, sizeof(code), fp);
+		fgetpos(fp, &pos);
+		pos -= sizeof(code);
+		fsetpos(fp, &pos);
+	    printf("cmd: %02x, num:%06x -> ", code.b.cmd, code.b.num);
+	    
+		switch (code.b.cmd) {
+	    case 0x1:
+			parse_wr_code(fp);
+			break;
+	    default:
+			printf("unknown command\n");
+			return;
+	    }
+	}
+}

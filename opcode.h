@@ -84,5 +84,5 @@ void jmp_code(FILE *fp, char *label_name);
 void print_labels(void);
 void link_labels(FILE *fp);
 void print_rom_patch(FILE *fp);
-
+void parse_opcode(FILE *fp);
 #endif /* end of "ifndef _OPCODE_H_" */
