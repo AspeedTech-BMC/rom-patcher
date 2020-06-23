@@ -7,6 +7,16 @@
 #include "ddr4_init.h"
 #include "bootloader.h"
 
+struct sb_header {
+	uint32_t key_location;
+	uint32_t enc_img_addr;
+	uint32_t img_size;
+	uint32_t sign_location;
+	uint32_t header_rev[2];
+	uint32_t patch_location;	/* address of the rom patch */
+	uint32_t checksum;
+};
+
 void uart_init(FILE *fp)
 {
 	wr_single(fp, UART_BASE + UART_LCR, 0x3);
@@ -25,6 +35,40 @@ void uart_init(FILE *fp)
 void uart_putc(FILE *fp, uint8_t c)
 {
 	wr_single(fp, UART_BASE + UART_THR, c);
+}
+
+void gen_test_bin(void)
+{
+	FILE *fp, *fb;
+	struct sb_header sbh;
+	uint8_t data;
+
+	fp = fopen("test.bin", "wb+");
+	if (!fp) {
+	    printf("can not open test file: %s\n", "test.bin");
+	    return;
+	}
+	fseek(fp, CONFIG_SECURE_BOOT_HDR_START, SEEK_SET);
+
+	fb = fopen(OUTPUT_BIN_NAME, "rb");
+	if (!fb) {
+	    printf("can not open dest file: %s\n", OUTPUT_BIN_NAME);
+	    return;
+	}
+	fseek(fb, 0, SEEK_SET);
+	
+	memset(&sbh, 0, sizeof(sbh));
+	sbh.patch_location = CONFIG_OFFSET_PATCH_START;
+	sbh.img_size = 63 * 1024;
+	fwrite(&sbh, 1, sizeof(sbh), fp);
+	fseek(fp, CONFIG_OFFSET_PATCH_START, SEEK_SET);
+
+	while (fread(&data, 1, sizeof(data), fb)) {
+		fwrite(&data, 1, sizeof(data), fp);
+	}
+
+	fclose(fp);
+	fclose(fb);
 }
 /**
  *                 0000_0000 +--------------------+
@@ -122,4 +166,6 @@ int main()
 	print_rom_patch(fp);
 
 	fclose(fp);	
+
+	gen_test_bin();
 }

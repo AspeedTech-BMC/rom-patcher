@@ -8,7 +8,8 @@
 //#define CONFIG_ASPEED_DDR4_800
 
 /* memory offsets */
-#define CONFIG_OFFSET_PATCH_START	0x50
+#define CONFIG_SECURE_BOOT_HDR_START	0x20
+#define CONFIG_OFFSET_PATCH_START		0x50
 
 #define OUTPUT_BIN_NAME		"rom_patch.bin"
 #define CM3_BIN_NAME		"ast2600_ssp.bin"
