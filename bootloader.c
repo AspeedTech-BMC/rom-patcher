@@ -14,9 +14,10 @@ struct sb_header {
 	uint32_t checksum;
 };
 
-struct cm3_image {
+struct cm3_image_header {
 	uint32_t magic;
-	uint32_t addr;				/* byte address */
+	uint32_t src;				/* byte address */
+	uint32_t dst;
 	uint32_t size_dw;			/* size is in uint32_t */
 };
 
@@ -24,16 +25,70 @@ struct cm3_image {
 // 2000_0000 - 2000_001F: reserved for ARM Cortex A7
 // 2000_0020 - 2000_003F: secure boot header
 // 2000_0040 ~          : ROM patch
-
-void copy_cm3(FILE *fp)
+uint32_t get_cm3_bin_size(void)
 {
+	FILE *bin;
+	uint32_t size = 0;
+
+	bin = fopen("ast2600_ssp.bin", "rb");
+	fseek(bin, 0, SEEK_END);
+	size = ftell(bin);
+	fclose(bin);
+
+	return size;
+}
+
+void attach_cm3_code(FILE *fp)
+{
+	struct cm3_image_header hdr;
+	FILE *fb;
+	fpos_t fp_cur;
+	uint8_t data;
+
+	fgetpos(fp, &fp_cur);
+
+	hdr.magic = 0x55667788;
+	hdr.src = CONFIG_OFFSET_PATCH_START + fp_cur + sizeof(hdr);
+	hdr.dst = DRAM_BASE;
+	hdr.size_dw = (get_cm3_bin_size() + 0x3) >> 2;
+	fwrite(&hdr, 1, sizeof(hdr), fp);
+
+	fb = fopen("ast2600_ssp.bin", "rb");
+	fseek(fb, 0, SEEK_SET);
+
+	while (fread(&data, 1, sizeof(data), fb)) {
+		fwrite(&data, 1, sizeof(data), fp);
+	}
+	fclose(fb);
+
+	/* make pointer be 4-byte aligned */
+	fgetpos(fp, &fp_cur);
+	fp_cur = ((fp_cur + 0x3) >> 2) << 2;
+	fsetpos(fp, &fp_cur);
+
+}
+
+void copy_cm3(FILE *fp, fpos_t start)
+{
+	fpos_t fp_cur;
+	struct cm3_image_header hdr;
+
+	/* 
+	1. backup current pointer
+	2. set pointer to image start for reading the image header
+	3. restore current pointer
+	*/
+	fgetpos(fp, &fp_cur);
+	fsetpos(fp, &start);
+	fread(&hdr, 1, sizeof(hdr), fp);
+	fsetpos(fp, &fp_cur);
+
 	/* copy CM3 bootcode */
-	///cm3_bin_offset = SB_HDR_SIZE_BYTE + sizeof(rom_code);
 	log_jeq(fp, SBC_BASE + OTP_QSR, BIT(26), BIT(26), "l_copy_from_sram");
-	//cp_code(fp, SPI_BASE + cm3_bin_offset, DRAM_BASE, CM3_BIN_SIZE_DW);
+	cp_code(fp, SPI_BASE + hdr.src, hdr.dst, hdr.size_dw);
 	log_jmp(fp, "l_copy_done");
 	log_label(fp, "l_copy_from_sram");	
-	//cp_code(fp, SRAM_BASE + cm3_bin_offset, DRAM_BASE, CM3_BIN_SIZE_DW);
+	cp_code(fp, SRAM_BASE + hdr.src, hdr.dst, hdr.size_dw);
 	log_label(fp, "l_copy_done");
 	
 }

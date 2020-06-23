@@ -6,12 +6,35 @@
 #include "ast2600.h"
 #include "ddr4_init.h"
 #include "bootloader.h"
-
+/**
+ *                 0000_0000 +--------------------+
+ *                           | ARM CA7 code
+ *                 0000_0020 +--------------------+
+ *                           | secure boot header
+ *                           | ...
+ *                 0000_0038 | patch code location (fixed value: CONFIG_OFFSET_PATCH_START)
+ *                           | ...
+ *                 0000_0040 +--------------------+
+ *                           | reserved
+ * CONFIG_OFFSET_PATCH_START +--------------------+
+ *                           | start code
+ *                           | jump to l_start
+ *                           +--------------------+
+ *                           | CM3 image header
+ *                           | CM3 binary
+ *                  l_start  +--------------------+
+ *                           | init DRAM
+ *                           | download CM3 binary to DRAM
+ *                           | enable CM3
+ *                           | end code (0x0000_000F)
+ *                           +--------------------+
+*/
 int main()
 {
-    int i, j, size;
-	uint32_t cm3_bin_offset, data;
 	FILE *fp;
+	fpos_t cm3_img_start;
+	uint32_t size;
+    int i, j;
 
 	fp = fopen("rom_patch.bin", "wb+");
 	if (!fp) {
@@ -22,7 +45,11 @@ int main()
 
     /* ---------- start ---------- */ 
 	start_code(fp);
-
+	log_jmp(fp, "l_start");
+	fgetpos(fp, &cm3_img_start);
+	attach_cm3_code(fp);
+	
+	log_label(fp, "l_start");
 	/* goto l_calc_size if DRAM is already initialized */
     log_jeq(fp, SCU_BASE + 0x100, BIT(6), BIT(6), "l_calc_size");
 
@@ -56,7 +83,8 @@ int main()
     /* DDR4 init end: set handshake bits */
     setbit_code(fp, SCU_BASE + 0x100, BIT(7) | BIT(6));
 
-	copy_cm3(fp);
+	/* download and enable CM3 */
+	copy_cm3(fp, cm3_img_start);
 	enable_cm3(fp);
     quit_code(fp);
 
@@ -64,7 +92,8 @@ int main()
 	
 	/* link label addresses and jump instructions */
 	link_labels(fp);
-
+	
+	/* ---------- end ---------- */ 
 
 	print_rom_patch(fp);
 

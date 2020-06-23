@@ -181,7 +181,7 @@ void log_jeq(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
     fgetpos(fp, &jmp->position);
     strcpy(&jmp->name[0], label_name);
 
-	printf("[%x] jmp to %s\n", jmp->position, jmp->name);
+	printf("[%08llx] jeq to %s\n", jmp->position, jmp->name);
 
     jeq_code(fp, addr, mask, target, 0);
 }
@@ -194,6 +194,8 @@ void log_jne(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
     fgetpos(fp, &jmp->position);
     strcpy(&jmp->name[0], label_name);
 
+	printf("[%08llx] jne to %s\n", jmp->position, jmp->name);
+
     jne_code(fp, addr, mask, target, 0);
 }
 
@@ -204,39 +206,44 @@ void log_jmp(FILE *fp, char *label_name)
     fgetpos(fp, &jmp->position);
     strcpy(&jmp->name[0], label_name);
 
+	printf("[%08llx] jmp to %s\n", jmp->position, jmp->name);
+
+	/* trick: assert CHIP_ID != 0 */
     jne_code(fp, SCU_BASE + 0x4, 0, 0xffffffff, 0);
 }
 
 void print_labels(void)
 {
 	int i;
-	/* ---------- debug print ---------- */
+
 	printf("---------------------------------------------------------------\n");
 	printf("list of labels\n");
 	printf("---------------------------------------------------------------\n");
 	for (i = 0; i < rom_labels.count; i++) {
 		label_t *lab = &rom_labels.labels[i];
-		printf("[%llx](%llu) %s\n", (long long)lab->position, (long long)lab->position, lab->name);
+		printf("[%08llx](%8llu) %s\n", (long long)lab->position, (long long)lab->position, lab->name);
 	}
 }
 
-// +------------------+
-// | start            |
-// +------------------+
-// | ...              |
-// +------------------+
-// | jump inst. start | -> jmp_list.jmps[i].position
-// +------------------+
-// | ...              |
-// +------------------+
-// | jump inst. end   |
-// +------------------+
-// | next inst.       | -> jmp_list.jmps[i].position + sizeof(rom_op_jmp_t)
-// +------------------+
-// | ...              |
-// +------------------+
-// | label to jump    | -> rom_labels.labels[j].position
-// +------------------+
+/**
+ *	+------------------+
+ *	| start            |
+ *	+------------------+
+ *	| ...              |
+ *	+------------------+
+ *	| jump inst. start | -> jmp_list.jmps[i].position
+ *	+------------------+
+ *	| ...              |
+ *	+------------------+
+ *	| jump inst. end   |
+ *	+------------------+
+ *	| next inst.       | -> jmp_list.jmps[i].position + sizeof(rom_op_jmp_t)
+ *	+------------------+
+ *	| ...              |
+ *	+------------------+
+ *	| label to jump    | -> rom_labels.labels[j].position
+ *	+------------------+
+ */
 void link_labels(FILE *fp)
 {
 	int i, j;
@@ -251,7 +258,7 @@ void link_labels(FILE *fp)
 				
 				code.cmd.b.num = rom_labels.labels[j].position - (jmp_list.jmps[i].position + sizeof(rom_op_jmp_t));
 				
-				printf("code: %08x\n", code.cmd.w);
+				//printf("code: %08x\n", code.cmd.w);
 				fsetpos(fp, &jmp_list.jmps[i].position);
 				fwrite(&code, 1, sizeof(code), fp);
 		    }
