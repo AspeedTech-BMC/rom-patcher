@@ -2,7 +2,7 @@
 ## usage
 ### step 1: configure `CONFIG_OFFSET_PATCH_START` in `config.h`
 this is the address offset of this patch code binary that will be placed on the SPI Flash.
-Then, execute `make` to generate `rom_patch`
+Modify it, then execute `make` to generate `rom_patch`
 
 Note: this step can be ignored if `CONFIG_OFFSET_PATCH_START` isn't changed.
 
@@ -13,3 +13,13 @@ Note: this step can be ignored if `ast2600_ssp.bin` isn't changed.
 
 ### step 3: execution
 execute `./rom_patch`, the output file `rom_patch.bin` will be generated.
+
+## generate patch code for different targets
+
+Modify `config.h` and re-compile `rom_patch`
+
+- `CONFIG_FPGA_ASPEED`: for FPGA
+- `CONFIG_ASPEED_DDR4_DUALX8`: DDR4 dual X8 die
+- AC timing
+  - `CONFIG_ASPEED_DDR4_1600`: DDR4-1600 AC timing
+  - `CONFIG_ASPEED_DDR4_800`: DDR4-800 AC timing
