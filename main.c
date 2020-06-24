@@ -42,12 +42,15 @@ void gen_test_bin(void)
 	FILE *fp, *fb;
 	struct sb_header sbh;
 	uint8_t data;
+	uint32_t ca7_jmp_code[3] = 	{ 0xe3000000, 0xe3400001, 0xe1a0f000 };
 
 	fp = fopen("test.bin", "wb+");
 	if (!fp) {
 	    printf("can not open test file: %s\n", "test.bin");
 	    return;
 	}
+	fseek(fp, 0, SEEK_SET);
+	fwrite(&ca7_jmp_code, 1, sizeof(ca7_jmp_code), fp);
 	fseek(fp, CONFIG_SECURE_BOOT_HDR_START, SEEK_SET);
 
 	fb = fopen(OUTPUT_BIN_NAME, "rb");
