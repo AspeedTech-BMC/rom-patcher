@@ -12,5 +12,9 @@
 #define CONFIG_OFFSET_PATCH_START		0x50
 
 #define OUTPUT_BIN_NAME		"rom_patch.bin"
+#ifdef CONFIG_FPGA_ASPEED
+#define CM3_BIN_NAME		"ast2600_ssp_fpga.bin"
+#else
 #define CM3_BIN_NAME		"ast2600_ssp.bin"
+#endif
 #endif /* end of "#ifndef _CONFIG_H_" */
