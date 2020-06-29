@@ -1,6 +1,8 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
+#ifndef __APPLE__
 #define LINUX_BUILD
+#endif
 #define CONFIG_SYS_SDRAM_BASE   0x80000000
 #define CONFIG_FPGA_ASPEED
 //#define CONFIG_ASPEED_PALLADIUM
