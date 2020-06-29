@@ -43,7 +43,11 @@ void attach_cm3_binary(FILE *fp)
 	fgetpos(fp, &fp_cur);
 
 	hdr.magic = 0x55667788;
+#ifdef LINUX_BUILD
+	hdr.src = CONFIG_OFFSET_PATCH_START + fp_cur.__pos + sizeof(hdr);
+#else
 	hdr.src = CONFIG_OFFSET_PATCH_START + fp_cur + sizeof(hdr);
+#endif	
 	hdr.dst = DRAM_BASE;
 	hdr.size_dw = (get_cm3_bin_size() + 0x3) >> 2;
 	fwrite(&hdr, 1, sizeof(hdr), fp);
@@ -62,7 +66,11 @@ void attach_cm3_binary(FILE *fp)
 
 	/* make pointer be 4-byte aligned */
 	fgetpos(fp, &fp_cur);
+#ifdef LINUX_BUILD	
+	fp_cur.__pos = ((fp_cur.__pos + 0x3) >> 2) << 2;
+#else
 	fp_cur = ((fp_cur + 0x3) >> 2) << 2;
+#endif	
 	fsetpos(fp, &fp_cur);
 
 }

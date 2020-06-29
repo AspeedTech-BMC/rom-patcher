@@ -180,9 +180,11 @@ void jeq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
 
     fgetpos(fp, &jmp->position);
     strcpy(&jmp->name[0], label_name);
-
+#ifdef LINUX_BUILD
+	printf("[%08lx] jeq to %s\n", jmp->position.__pos, jmp->name);
+#else
 	printf("[%08llx] jeq to %s\n", jmp->position, jmp->name);
-
+#endif
     _jeq_code(fp, addr, mask, target, 0);
 }
 
@@ -193,9 +195,11 @@ void jne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
 
     fgetpos(fp, &jmp->position);
     strcpy(&jmp->name[0], label_name);
-
+#ifdef LINUX_BUILD
+	printf("[%08lx] jne to %s\n", jmp->position.__pos, jmp->name);
+#else
 	printf("[%08llx] jne to %s\n", jmp->position, jmp->name);
-
+#endif
     _jne_code(fp, addr, mask, target, 0);
 }
 
@@ -205,9 +209,11 @@ void jmp_code(FILE *fp, char *label_name)
 
     fgetpos(fp, &jmp->position);
     strcpy(&jmp->name[0], label_name);
-
+#ifdef LINUX_BUILD
+	printf("[%08lx] jmp to %s\n", jmp->position.__pos, jmp->name);
+#else
 	printf("[%08llx] jmp to %s\n", jmp->position, jmp->name);
-
+#endif
 	/* trick: assert CHIP_ID != 0 */
     _jne_code(fp, SCU_BASE + 0x4, 0, 0xffffffff, 0);
 }
@@ -221,7 +227,11 @@ void print_labels(void)
 	printf("---------------------------------------------------------------\n");
 	for (i = 0; i < rom_labels.count; i++) {
 		label_t *lab = &rom_labels.labels[i];
+#ifdef LINUX_BUILD
+		printf("[%08llx](%8llu) %s\n", (long long)lab->position.__pos, (long long)lab->position.__pos, lab->name);
+#else
 		printf("[%08llx](%8llu) %s\n", (long long)lab->position, (long long)lab->position, lab->name);
+#endif		
 	}
 }
 
@@ -255,8 +265,11 @@ void link_labels(FILE *fp)
 				
 				fsetpos(fp, &jmp_list.jmps[i].position);
 				fread(&code, 1, sizeof(code), fp);
-				
+#ifdef LINUX_BUILD			
+				code.cmd.b.num = rom_labels.labels[j].position.__pos - (jmp_list.jmps[i].position.__pos + sizeof(rom_op_jmp_t));
+#else
 				code.cmd.b.num = rom_labels.labels[j].position - (jmp_list.jmps[i].position + sizeof(rom_op_jmp_t));
+#endif				
 				
 				//printf("code: %08x\n", code.cmd.w);
 				fsetpos(fp, &jmp_list.jmps[i].position);
@@ -313,7 +326,11 @@ void parse_opcode(FILE *fp)
 	while (1) {
 	    fread(&code, 1, sizeof(code), fp);
 		fgetpos(fp, &pos);
+#ifdef LINUX_BUILD		
+		pos.__pos -= sizeof(code);
+#else
 		pos -= sizeof(code);
+#endif		
 		fsetpos(fp, &pos);
 	    printf("cmd: %02x, num:%06x -> ", code.b.cmd, code.b.num);
 	    
