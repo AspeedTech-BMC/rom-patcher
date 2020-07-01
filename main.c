@@ -1,3 +1,39 @@
+/**
+ * AST2600A2 CM3 boot - Flash layout
+ * 
+ *                 0000_0000 +--------------------+
+ *                           | CA7 code:
+ *                           |   movw r0, #0  ; r0[15:0] = 0x0000
+ *                           |   movt r0, #1  ; r0[31:16] = 0x0001
+ *                           |   mov  pc, r0  ; pc is 0x00010000 (64KB)
+ *                           |
+ *                 0000_0020 +--------------------+
+ *                           | secure boot header:
+ *                           | ...
+ *                 0000_0038 |   patch code location (fixed value: CONFIG_OFFSET_PATCH_START)
+ *                           | ...
+ *                 0000_0040 +--------------------+
+ *                           | reserved
+ * CONFIG_OFFSET_PATCH_START +--------------------+
+ *                           | patch code part1:
+ *                           |   start code
+ *                           |   uart5 init
+ *                           |   jump to l_start
+ *                           +--------------------+
+ *                           | CM3 image header
+ *                           | CM3 binary
+ *                  l_start  +--------------------+
+ *                           | patch code part2:
+ *                           |   init DRAM
+ *                           |   download CM3 binary to DRAM
+ *                           |   reset CM3
+ *                           |   end code (0x0000_000F)
+ *                           +--------------------+
+ *                           | ...
+ *                0001_0000  +--------------------+
+ *                           | CA7 u-boot binary
+ *                           +--------------------+
+*/
 #include <stdio.h>
 #include <string.h>
 #include "opcode.h"
@@ -37,6 +73,18 @@ void uart_putc(FILE *fp, uint8_t c)
 	wr_single(fp, UART_BASE + UART_THR, c);
 }
 
+/**
+ * @brief generate SPI Flash binary
+ * 
+ * including:
+ *   - CA7 code (pc jump to 0x0001_0000)
+ *   - secure boot header
+ *   - patch code
+ *   - CM3 binary
+ * 
+ * NOT including:
+ *   - CA7 u-boot image: please use gen_cm3_boot_ca7.sh
+*/
 void gen_test_bin(void)
 {
 	FILE *fp, *fb;
@@ -94,29 +142,7 @@ void parse_test_bin(void)
 	parse_opcode(fp);
 	fclose(fp);
 }
-/**
- *                 0000_0000 +--------------------+
- *                           | ARM CA7 code
- *                 0000_0020 +--------------------+
- *                           | secure boot header
- *                           | ...
- *                 0000_0038 | patch code location (fixed value: CONFIG_OFFSET_PATCH_START)
- *                           | ...
- *                 0000_0040 +--------------------+
- *                           | reserved
- * CONFIG_OFFSET_PATCH_START +--------------------+
- *                           | start code
- *                           | jump to l_start
- *                           +--------------------+
- *                           | CM3 image header
- *                           | CM3 binary
- *                  l_start  +--------------------+
- *                           | init DRAM
- *                           | download CM3 binary to DRAM
- *                           | enable CM3
- *                           | end code (0x0000_000F)
- *                           +--------------------+
-*/
+
 int main()
 {
 	FILE *fp;

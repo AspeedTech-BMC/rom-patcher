@@ -2,7 +2,7 @@
 ## usage
 ### step 1: configure `CONFIG_OFFSET_PATCH_START` in `config.h`
 this is the address offset of this patch code binary that will be placed on the SPI Flash.
-Modify it, then execute `make` to generate `rom_patch`
+The default value is 0x50.  Modify it if necessary, then execute `make` to generate `rom_patch`
 
 Note: this step can be ignored if `CONFIG_OFFSET_PATCH_START` isn't changed.
 
@@ -12,8 +12,9 @@ update `ast2600_ssp.bin` to the root folder
 Note: this step can be ignored if `ast2600_ssp.bin` isn't changed.
 
 ### step 3: execution
-execute `./rom_patch`, the output file `rom_patch.bin` will be generated.
-
+execute `./rom_patch`, the output file `rom_patch.bin` and `test.bin` will be generated.
+- `rom_patch.bin`: only ROM patch code and CM3 image
+- `test.bin`: including CA7 jump code, secure boot header, ROM patch and CM3 image
 ## generate patch code for different targets
 
 Modify `config.h` and re-compile `rom_patch`

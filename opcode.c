@@ -311,6 +311,11 @@ void parse_wr_code(FILE *fp)
     }
     printf("\n");
 }
+
+/**
+ * @brief parse patch OP code
+ * @todo  only wr command is done, others are TBD.
+*/
 void parse_opcode(FILE *fp)
 {
 	uint32_t data;
