@@ -1,0 +1,1 @@
+dd if=test.bin of=cm3_u-boot.bin bs=1; dd if=u-boot.bin of=cm3_u-boot.bin bs=1 seek=65536
