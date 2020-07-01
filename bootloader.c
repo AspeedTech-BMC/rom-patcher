@@ -111,5 +111,7 @@ void enable_cm3(FILE *fp)
 	wr_single(fp, SCU_BASE + 0xa00, 2);
 	delay_code(fp, 500);
 	wr_single(fp, SCU_BASE + 0xa00, 0);
+#if 0	
 	wr_single(fp, SCU_BASE + 0xa00, 1);
+#endif	
 }
