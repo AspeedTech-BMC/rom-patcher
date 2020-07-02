@@ -3,7 +3,8 @@
 rom_patch
 rom_patch.bin
 cm3_u-boot.bin
-test.bin
+boot.bin
+boot_enc.bin
 u-boot.bin
 GPATH
 GRTAGS

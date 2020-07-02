@@ -12,9 +12,9 @@ update `ast2600_ssp.bin` to the root folder
 Note: this step can be ignored if `ast2600_ssp.bin` isn't changed.
 
 ### step 3: execution
-execute `./rom_patch`, the output file `rom_patch.bin` and `test.bin` will be generated.
+execute `./rom_patch`, the output file `rom_patch.bin` and `boot.bin` will be generated.
 - `rom_patch.bin`: only ROM patch code and CM3 image
-- `test.bin`: including CA7 jump code, secure boot header, ROM patch and CM3 image
+- `boot.bin`: including CA7 jump code, secure boot header, ROM patch and CM3 image
 ## generate patch code for different targets
 
 Modify `config.h` and re-compile `rom_patch`

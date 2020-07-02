@@ -85,16 +85,16 @@ void uart_putc(FILE *fp, uint8_t c)
  * NOT including:
  *   - CA7 u-boot image: please use gen_cm3_boot_ca7.sh
 */
-void gen_test_bin(void)
+void gen_boot_image(void)
 {
 	FILE *fp, *fb;
 	struct sb_header sbh;
 	uint8_t data;
 	uint32_t ca7_jmp_code[3] = 	{ 0xe3000000, 0xe3400001, 0xe1a0f000 };
 
-	fp = fopen("test.bin", "wb+");
+	fp = fopen("boot.bin", "wb+");
 	if (!fp) {
-	    printf("can not open test file: %s\n", "test.bin");
+	    printf("can not open test file: %s\n", "boot.bin");
 	    return;
 	}
 	fseek(fp, 0, SEEK_SET);
@@ -127,7 +127,7 @@ void parse_test_bin(void)
 	FILE *fp;
 	struct sb_header sbh;
 
-	fp = fopen("test.bin", "rb");
+	fp = fopen("boot.bin", "rb");
 	fseek(fp, 0x20, SEEK_CUR);
 
 	fread(&sbh, 1, sizeof(sbh), fp);
@@ -185,7 +185,7 @@ int main()
 	fclose(fp);	
 
 	/* test: generate whole SPI boot image */
-	gen_test_bin();
+	gen_boot_image();
 	parse_test_bin();
 	return 0;
 }
