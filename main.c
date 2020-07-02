@@ -101,9 +101,9 @@ void gen_boot_image(void)
 	fwrite(&ca7_jmp_code, 1, sizeof(ca7_jmp_code), fp);
 	fseek(fp, CONFIG_SECURE_BOOT_HDR_START, SEEK_SET);
 
-	fb = fopen(OUTPUT_BIN_NAME, "rb");
+	fb = fopen(ROM_PATCH_BIN_NAME, "rb");
 	if (!fb) {
-	    printf("can not open dest file: %s\n", OUTPUT_BIN_NAME);
+	    printf("can not open dest file: %s\n", ROM_PATCH_BIN_NAME);
 	    return;
 	}
 	fseek(fb, 0, SEEK_SET);
@@ -150,9 +150,9 @@ int main()
 	uint32_t size;
     int i, j;
 
-	fp = fopen(OUTPUT_BIN_NAME, "wb+");
+	fp = fopen(ROM_PATCH_BIN_NAME, "wb+");
 	if (!fp) {
-	    printf("can not open dest file: %s\n", OUTPUT_BIN_NAME);
+	    printf("can not open dest file: %s\n", ROM_PATCH_BIN_NAME);
 	    return -1;
 	}
 	fseek(fp, 0, SEEK_SET);
