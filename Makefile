@@ -5,4 +5,4 @@ all:
 
 
 clean:
-	@rm -f *.o *.bin rom_patch
+	@rm -f *.o rom_patch boot.bin rom_patch.bin
