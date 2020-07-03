@@ -5,6 +5,16 @@
 #include "ast2600.h"
 #include "opcode.h"
 
+/**
+ * double-word (4-byte) aligned size
+*/
+#define DW_ALIGNED_DW_SIZE(byte_size)	(((byte_size) + 0x3) >> 2)
+
+/**
+ * double-word (4-byte) aligned size in byte
+*/
+#define DW_ALIGNED_BYTE_SIZE(byte_size)	(DW_ALIGNED_DW_SIZE(byte_size) << 2)
+
 struct cm3_image_header {
 	uint32_t magic;
 	uint32_t src;				/* byte address */
@@ -46,7 +56,7 @@ void attach_cm3_binary(FILE *fp)
 	hdr.magic = 0x55667788;
 	hdr.src = CONFIG_OFFSET_PATCH_START + vPOS(fp_cur) + sizeof(hdr);
 	hdr.dst = DRAM_BASE;
-	hdr.size_dw = (get_cm3_bin_size() + 0x3) >> 2;
+	hdr.size_dw = DW_ALIGNED_DW_SIZE(get_cm3_bin_size());
 	fwrite(&hdr, 1, sizeof(hdr), fp);
 
 	fb = fopen(CM3_BIN_NAME, "rb");
@@ -63,7 +73,7 @@ void attach_cm3_binary(FILE *fp)
 
 	/* make pointer be 4-byte aligned */
 	fgetpos(fp, &fp_cur);
-	vPOS(fp_cur) = ((vPOS(fp_cur) + 0x3) >> 2) << 2;
+	vPOS(fp_cur) = DW_ALIGNED_BYTE_SIZE(vPOS(fp_cur));
 	fsetpos(fp, &fp_cur);
 
 }
