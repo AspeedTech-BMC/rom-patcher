@@ -7,9 +7,20 @@
 #define CONFIG_ASPEED_DDR4_1600
 //#define CONFIG_ASPEED_DDR4_800
 
-/* memory offsets */
+/**
+ * secure boot header offset on SPI Flash
+*/
 #define CONFIG_SECURE_BOOT_HDR_START	0x20
+
+/**
+ * patch code offset on SPI Flash
+*/
 #define CONFIG_OFFSET_PATCH_START	0x50
+
+/**
+ * the destination address of the CM3 image
+*/
+#define CONFIG_CM3_DEST_ADDR		CONFIG_SYS_SDRAM_BASE
 
 #define ROM_PATCH_BIN_NAME		"rom_patch.bin"
 #ifdef CONFIG_FPGA_ASPEED
