@@ -17,4 +17,11 @@
 #else
 #define CM3_BIN_NAME		"ast2600_ssp.bin"
 #endif
+
+/* file position value */
+#ifdef __APPLE__		
+#define vPOS(pos)	pos
+#else
+#define vPOS(pos)	pos.__pos
+#endif
 #endif /* end of "#ifndef _CONFIG_H_" */
