@@ -122,7 +122,7 @@ void gen_boot_image(void)
 	fclose(fb);
 }
 
-void parse_test_bin(void)
+void parse_boot_image(void)
 {
 	FILE *fp;
 	struct sb_header sbh;
@@ -148,7 +148,7 @@ int main()
 	FILE *fp;
 	fpos_t cm3_img_start;
 	uint32_t size;
-    int i, j;
+	int i, j;
 
 	fp = fopen(ROM_PATCH_BIN_NAME, "wb+");
 	if (!fp) {
@@ -171,7 +171,7 @@ int main()
 	copy_cm3(fp, cm3_img_start);
 	enable_cm3(fp);
 	uart_putc(fp, '6');
-    quit_code(fp);
+	quit_code(fp);
 
 	print_labels();
 	
@@ -186,6 +186,6 @@ int main()
 
 	/* test: generate whole SPI boot image */
 	gen_boot_image();
-	parse_test_bin();
+	parse_boot_image();
 	return 0;
 }
