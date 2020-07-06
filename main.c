@@ -130,8 +130,18 @@ int main()
 
 	/* ---------- patch code header ---------- */ 
 	start_code(fp);
-	uart_init(fp);
-	uart_putc(fp, '1');
+	//uart_init(fp);
+	uart_putc(fp, '\r');
+	uart_putc(fp, '\n');
+	uart_putc(fp, 'A');
+	uart_putc(fp, 'S');
+	uart_putc(fp, 'T');
+	uart_putc(fp, '2');
+	uart_putc(fp, '6');
+	uart_putc(fp, '5');
+	uart_putc(fp, '0');
+	uart_putc(fp, '\r');
+	uart_putc(fp, '\n');
 	jmp_code(fp, "l_start");
 	
 	/* ---------- CM3 image ---------- */ 
@@ -143,7 +153,6 @@ int main()
 	sdram_probe(fp);
 	copy_cm3(fp, cm3_img_start);
 	enable_cm3(fp);
-	uart_putc(fp, '6');
 	/* ---------- patch code end ---------- */ 
 	quit_code(fp);
 

@@ -243,7 +243,6 @@ void sdram_probe(FILE *fp)
 {
 	/* goto l_calc_size if DRAM is already initialized */
     jeq_code(fp, SCU_BASE + 0x100, BIT(6), BIT(6), "l_calc_size");
-	uart_putc(fp, '2');
 	/* set MPLL */
     rmw_code(fp, MPLL_REG, ~(BIT(24) | GENMASK(22, 0)),
 	     BIT(25) | BIT(23) | MPLL_FREQ_400M);
@@ -251,7 +250,6 @@ void sdram_probe(FILE *fp)
     delay_code(fp, 100);
     rmw_code(fp, MPLL_REG, GENMASK(31, 0), ~(BIT(25) | BIT(23)));
     waiteq_code(fp, MPLL_EXT_REG, BIT(31), BIT(31), 1);
-	uart_putc(fp, '3');
 	/* ast2600_sdrammc_unlock */
     wr_single(fp, MMC_BASE, MMC_UNLOCK_KEY);
     waiteq_code(fp, MMC_BASE, BIT(0), BIT(0), 1);
@@ -267,12 +265,10 @@ void sdram_probe(FILE *fp)
 	waiteq_code(fp, PHY_BASE + 0x300, BIT(1), BIT(1), 1);
 	sdramphy_check_status(fp);
 #endif
-	uart_putc(fp, '4');
 
     declare_label(fp, "l_calc_size");
 	sdrammc_calc_size(fp);
 
     /* DDR4 init end: set handshake bits */
     setbit_code(fp, SCU_BASE + 0x100, BIT(7) | BIT(6));
-	uart_putc(fp, '5');
 }
