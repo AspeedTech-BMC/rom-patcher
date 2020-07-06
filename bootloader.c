@@ -54,7 +54,7 @@ void attach_cm3_binary(FILE *fp)
 	fgetpos(fp, &fp_cur);
 
 	hdr.magic = 0x55667788;
-	hdr.src = CONFIG_OFFSET_PATCH_START + vPOS(fp_cur) + sizeof(hdr);
+	hdr.src =  vPOS(fp_cur) + sizeof(hdr);
 	hdr.dst = CONFIG_CM3_DEST_ADDR;
 	hdr.size_dw = DW_ALIGNED_DW_SIZE(get_cm3_bin_size());
 	fwrite(&hdr, 1, sizeof(hdr), fp);

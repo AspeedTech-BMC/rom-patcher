@@ -22,7 +22,6 @@
 */
 #define CONFIG_CM3_DEST_ADDR		CONFIG_SYS_SDRAM_BASE
 
-#define ROM_PATCH_BIN_NAME		"rom_patch.bin"
 #ifdef CONFIG_FPGA_ASPEED
 #define CM3_BIN_NAME		"ast2600_ssp_fpga.bin"
 #else

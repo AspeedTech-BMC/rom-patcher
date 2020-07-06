@@ -73,53 +73,11 @@ void uart_putc(FILE *fp, uint8_t c)
 	wr_single(fp, UART_BASE + UART_THR, c);
 }
 
-/**
- * @brief generate SPI Flash binary
- * 
- * including:
- *   - CA7 code (pc jump to 0x0001_0000)
- *   - secure boot header
- *   - patch code
- *   - CM3 binary
- * 
- * NOT including:
- *   - CA7 u-boot image: please use gen_cm3_boot_ca7.sh
-*/
-void gen_boot_image(void)
+void attach_ca7_jump_code(FILE *fp)
 {
-	FILE *fp, *fb;
-	struct sb_header sbh;
-	uint8_t data;
 	uint32_t ca7_jmp_code[3] = 	{ 0xe3000000, 0xe3400001, 0xe1a0f000 };
 
-	fp = fopen("boot.bin", "wb+");
-	if (!fp) {
-	    printf("can not open test file: %s\n", "boot.bin");
-	    return;
-	}
-	fseek(fp, 0, SEEK_SET);
 	fwrite(&ca7_jmp_code, 1, sizeof(ca7_jmp_code), fp);
-	fseek(fp, CONFIG_SECURE_BOOT_HDR_START, SEEK_SET);
-
-	fb = fopen(ROM_PATCH_BIN_NAME, "rb");
-	if (!fb) {
-	    printf("can not open dest file: %s\n", ROM_PATCH_BIN_NAME);
-	    return;
-	}
-	fseek(fb, 0, SEEK_SET);
-	
-	memset(&sbh, 0, sizeof(sbh));
-	sbh.patch_location = CONFIG_OFFSET_PATCH_START;
-	sbh.img_size = 63 * 1024;
-	fwrite(&sbh, 1, sizeof(sbh), fp);
-	fseek(fp, CONFIG_OFFSET_PATCH_START, SEEK_SET);
-
-	while (fread(&data, 1, sizeof(data), fb)) {
-		fwrite(&data, 1, sizeof(data), fp);
-	}
-
-	fclose(fp);
-	fclose(fb);
 }
 
 void parse_boot_image(void)
@@ -150,27 +108,43 @@ int main()
 	uint32_t size;
 	int i, j;
 
-	fp = fopen(ROM_PATCH_BIN_NAME, "wb+");
+	struct sb_header sbh;
+
+	fp = fopen("boot.bin", "wb+");
 	if (!fp) {
-	    printf("can not open dest file: %s\n", ROM_PATCH_BIN_NAME);
+	    printf("can not open dest file: %s\n", "boot.bin");
 	    return -1;
 	}
 	fseek(fp, 0, SEEK_SET);
 
-    /* ---------- start ---------- */ 
+	/* ---------- attach CA7 jump code ---------- */
+	attach_ca7_jump_code(fp);
+	fseek(fp, CONFIG_SECURE_BOOT_HDR_START, SEEK_SET);
+
+	/* ---------- attach secure boot header ---------- */
+	memset(&sbh, 0, sizeof(sbh));
+	sbh.patch_location = CONFIG_OFFSET_PATCH_START;
+	sbh.img_size = 63 * 1024;
+	fwrite(&sbh, 1, sizeof(sbh), fp);
+	fseek(fp, CONFIG_OFFSET_PATCH_START, SEEK_SET);
+
+	/* ---------- patch code header ---------- */ 
 	start_code(fp);
 	uart_init(fp);
 	uart_putc(fp, '1');
 	jmp_code(fp, "l_start");
+	
+	/* ---------- CM3 image ---------- */ 
 	fgetpos(fp, &cm3_img_start);
 	attach_cm3_binary(fp);
 	
+	/* ---------- patch code start ---------- */ 
 	declare_label(fp, "l_start");
 	sdram_probe(fp);
-	/* download and enable CM3 */
 	copy_cm3(fp, cm3_img_start);
 	enable_cm3(fp);
 	uart_putc(fp, '6');
+	/* ---------- patch code end ---------- */ 
 	quit_code(fp);
 
 	print_labels();
@@ -185,7 +159,7 @@ int main()
 	fclose(fp);	
 
 	/* test: generate whole SPI boot image */
-	gen_boot_image();
-	parse_boot_image();
+	//gen_boot_image();
+	//parse_boot_image();
 	return 0;
 }
