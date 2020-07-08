@@ -86,7 +86,7 @@ void parse_boot_image(void)
 	struct sb_header sbh;
 
 	fp = fopen("boot.bin", "rb");
-	fseek(fp, 0x20, SEEK_CUR);
+	fseek(fp, CONFIG_SECURE_BOOT_HDR_START, SEEK_CUR);
 
 	fread(&sbh, 1, sizeof(sbh), fp);
 	if (sbh.patch_location == 0) {
@@ -167,8 +167,7 @@ int main()
 
 	fclose(fp);	
 
-	/* test: generate whole SPI boot image */
-	//gen_boot_image();
-	//parse_boot_image();
+	/* test: parse commands */
+	parse_boot_image();
 	return 0;
 }
