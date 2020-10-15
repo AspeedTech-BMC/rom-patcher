@@ -1,5 +1,5 @@
 /**
- * AST2600A2 CM3 boot - Flash layout
+ * AST2605 SSP(CM3) boot - Flash layout
  * 
  *                 0000_0000 +--------------------+
  *                           | CA7 code:
