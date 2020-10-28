@@ -138,10 +138,8 @@ int main()
 	uart_putc(fp, 'T');
 	uart_putc(fp, '2');
 	uart_putc(fp, '6');
-	uart_putc(fp, '5');
 	uart_putc(fp, '0');
-	uart_putc(fp, '\r');
-	uart_putc(fp, '\n');
+	uart_putc(fp, '5');
 	jmp_code(fp, "l_start");
 	
 	/* ---------- CM3 image ---------- */ 
