@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #define START_CODE			0x1eadc0de
+/* rom tick is 40ns: so 1us = 1000ns / 40ns = 25 ticks */
 #define TICKS_PER_US		(1000 / 40)
 
 typedef union rom_op_cmd_s {
