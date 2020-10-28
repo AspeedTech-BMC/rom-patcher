@@ -81,6 +81,8 @@ void sdramphy_check_status(FILE *fp)
 	jeq_code(fp, PHY_STS_BASE + 0x00, BIT(3), BIT(3), "l_sdramphy_train");
 	jeq_code(fp, PHY_STS_BASE + 0x00, BIT(5), BIT(5), "l_sdramphy_train");
 
+	/* the delay time is MAGIC.  shorter delay would somehow cause DRAM init fail */
+	delay_code(fp, 3000);
 	/* retrain if PHY_STS068[7:0] == 0 */
 	jeq_code(fp, PHY_STS_BASE + 0x68, GENMASK(7, 0), 0, "l_sdramphy_train");
 
@@ -265,6 +267,9 @@ void sdram_probe(FILE *fp)
 	waiteq_code(fp, PHY_BASE + 0x300, BIT(1), BIT(1), 1);
 	sdramphy_check_status(fp);
 #endif
+
+	/* the delay time is MAGIC.  shorter delay would somehow cause DRAM init fail */
+	delay_code(fp, 5000);
 
     declare_label(fp, "l_calc_size");
 	sdrammc_calc_size(fp);
