@@ -109,8 +109,8 @@ void enable_cm3(FILE *fp)
 	wr_single(fp, SCU_BASE + 0xa04, CONFIG_CM3_DEST_ADDR);
 	wr_single(fp, SCU_BASE + 0xa48, 3);
 	wr_single(fp, SCU_BASE + 0xa48, 1);
-	wr_single(fp, SCU_BASE + 0xa08, CONFIG_CM3_DEST_ADDR + 0x00100000);
-	wr_single(fp, SCU_BASE + 0xa0c, CONFIG_CM3_DEST_ADDR + 0x00200000);
+	wr_single(fp, SCU_BASE + 0xa08, CONFIG_CM3_DEST_ADDR + 0x01000000);
+	wr_single(fp, SCU_BASE + 0xa0c, CONFIG_CM3_DEST_ADDR + 0x02000000);
 	wr_single(fp, SCU_BASE + 0xa00, 2);
 	delay_code(fp, 500);
 	wr_single(fp, SCU_BASE + 0xa00, 0);
