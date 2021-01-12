@@ -95,6 +95,7 @@ void copy_cm3(FILE *fp, fpos_t start)
 
 	/* copy CM3 bootcode */
 	jeq_code(fp, SBC_BASE + OTP_QSR, BIT(26), BIT(26), "l_copy_from_sram");
+	jeq_code(fp, STRAP_REG, BIT(1), BIT(1), "l_copy_from_sram");
 	cp_code(fp, SPI_BASE + hdr.src, hdr.dst, hdr.size_dw);
 	jmp_code(fp, "l_copy_done");
 	declare_label(fp, "l_copy_from_sram");	
