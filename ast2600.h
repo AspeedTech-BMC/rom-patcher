@@ -39,6 +39,7 @@
 
 /* secure boot controller */
 #define SBC_BASE						0x1e6f2000
+#define SBC_STS							0x14
 #define OTP_QSR							0x40
 
 #define SRAM_BASE						0x10000000	/* 64KB */
