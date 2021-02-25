@@ -101,14 +101,23 @@ void parse_boot_image(void)
 	fclose(fp);
 }
 
-int main()
+//int main()
+int main(int argc, char *argv[])
 {
 	FILE *fp;
 	fpos_t cm3_img_start;
 	uint32_t size;
 	int i, j;
+	char *cm3_bin_name = CM3_BIN_NAME;
 
 	struct sb_header sbh;
+
+	/* parsing input args */
+	if (argc > 1)
+		cm3_bin_name = argv[1];
+		        
+	printf("cm3 bin name = %s\n", cm3_bin_name);
+
 
 	fp = fopen("boot.bin", "wb+");
 	if (!fp) {
@@ -144,7 +153,7 @@ int main()
 	
 	/* ---------- CM3 image ---------- */ 
 	fgetpos(fp, &cm3_img_start);
-	attach_cm3_binary(fp);
+	attach_cm3_binary(fp, cm3_bin_name);
 	
 	/* ---------- patch code start ---------- */ 
 	declare_label(fp, "l_start");

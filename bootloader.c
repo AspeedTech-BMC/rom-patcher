@@ -26,14 +26,14 @@ struct cm3_image_header {
 // 2000_0000 - 2000_001F: reserved for ARM Cortex A7
 // 2000_0020 - 2000_003F: secure boot header
 // 2000_0040 ~          : ROM patch
-uint32_t get_cm3_bin_size(void)
+uint32_t get_cm3_bin_size(char *cm3_bin_name)
 {
 	FILE *fb;
 	uint32_t size = 0;
 
-	fb = fopen(CM3_BIN_NAME, "rb");
+	fb = fopen(cm3_bin_name, "rb");
 	if (!fb) {
-	    printf("can not open cm3 bin file: %s\n", CM3_BIN_NAME);
+	    printf("can not open cm3 bin file: %s\n", cm3_bin_name);
 		return 0;
 	}
 
@@ -44,7 +44,7 @@ uint32_t get_cm3_bin_size(void)
 	return size;
 }
 
-void attach_cm3_binary(FILE *fp)
+void attach_cm3_binary(FILE *fp, char *cm3_bin_name)
 {
 	struct cm3_image_header hdr;
 	FILE *fb;
@@ -56,12 +56,12 @@ void attach_cm3_binary(FILE *fp)
 	hdr.magic = 0x55667788;
 	hdr.src =  vPOS(fp_cur) + sizeof(hdr);
 	hdr.dst = CONFIG_CM3_DEST_ADDR;
-	hdr.size_dw = DW_ALIGNED_DW_SIZE(get_cm3_bin_size());
+	hdr.size_dw = DW_ALIGNED_DW_SIZE(get_cm3_bin_size(cm3_bin_name));
 	fwrite(&hdr, 1, sizeof(hdr), fp);
 
-	fb = fopen(CM3_BIN_NAME, "rb");
+	fb = fopen(cm3_bin_name, "rb");
 	if (!fb) {
-	    printf("can not open cm3 bin file: %s\n", CM3_BIN_NAME);
+	    printf("can not open cm3 bin file: %s\n", cm3_bin_name);
 		return;
 	}
 	fseek(fb, 0, SEEK_SET);

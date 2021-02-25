@@ -3,10 +3,11 @@ SDK=~/sdk
 ENCTOOL=$SDK/tools/socsec/socsec
 PLAINTEXT_BIN=./boot.bin
 CIPHERTEXT_BIN=./boot_enc.bin
+CM3_BIN_NAME=ast2605_ssp.bin
 
 set -e
 make
-./rom_patch > rom_patch.log
+./rom_patch $CM3_BIN_NAME > rom_patch.log
 
 if [ "$1" == "sec" ]
 then
