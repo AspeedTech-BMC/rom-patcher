@@ -9,3 +9,6 @@ u-boot.bin
 GPATH
 GRTAGS
 GTAGS
+.vscode/
+.vscode*
+.clang-format
