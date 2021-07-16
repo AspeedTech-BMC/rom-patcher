@@ -25,7 +25,7 @@
 #ifdef CONFIG_FPGA_ASPEED
 #define CM3_BIN_NAME		"ast2600_ssp_fpga.bin"
 #else
-#define CM3_BIN_NAME		"ast2605_ssp.bin"
+#define CM3_BIN_NAME		"zephyr.bin"
 #endif
 
 /* file position value */
