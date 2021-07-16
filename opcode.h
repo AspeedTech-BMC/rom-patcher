@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define START_CODE			0x1eadc0de
+#define START_CODE		0x1eadc0de
 /* rom tick is 40ns: so 1us = 1000ns / 40ns = 25 ticks */
 #define TICKS_PER_US		(1000 / 40)
 
@@ -66,8 +66,10 @@ void start_code(FILE *fp);
 void quit_code(FILE *fp);
 void wr_code(FILE *fp, uint32_t addr, uint32_t length, uint32_t *data);
 void wr_single(FILE *fp, uint32_t addr, uint32_t value);
-void waiteq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, uint32_t delay);
-void waitne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target, uint32_t delay);
+void waiteq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
+		 uint32_t delay);
+void waitne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
+		 uint32_t delay);
 void delay_code(FILE *fp, uint32_t delay);
 void rmw_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t value);
 void clrbit_code(FILE *fp, uint32_t addr, uint32_t value);
@@ -77,9 +79,9 @@ void cp_code(FILE *fp, uint32_t src, uint32_t dst, uint32_t size_dw);
 
 void declare_label(FILE *fp, char *name);
 void jeq_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
-		  char *label_name);
+	      char *label_name);
 void jne_code(FILE *fp, uint32_t addr, uint32_t mask, uint32_t target,
-		  char *label_name);
+	      char *label_name);
 void jmp_code(FILE *fp, char *label_name);
 
 void print_labels(void);

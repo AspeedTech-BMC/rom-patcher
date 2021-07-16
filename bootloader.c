@@ -33,7 +33,7 @@ uint32_t get_cm3_bin_size(char *cm3_bin_name)
 
 	fb = fopen(cm3_bin_name, "rb");
 	if (!fb) {
-	    printf("can not open cm3 bin file: %s\n", cm3_bin_name);
+		printf("can not open cm3 bin file: %s\n", cm3_bin_name);
 		return 0;
 	}
 
@@ -54,14 +54,14 @@ void attach_cm3_binary(FILE *fp, char *cm3_bin_name)
 	fgetpos(fp, &fp_cur);
 
 	hdr.magic = 0x55667788;
-	hdr.src =  vPOS(fp_cur) + sizeof(hdr);
+	hdr.src = vPOS(fp_cur) + sizeof(hdr);
 	hdr.dst = CONFIG_CM3_DEST_ADDR;
 	hdr.size_dw = DW_ALIGNED_DW_SIZE(get_cm3_bin_size(cm3_bin_name));
 	fwrite(&hdr, 1, sizeof(hdr), fp);
 
 	fb = fopen(cm3_bin_name, "rb");
 	if (!fb) {
-	    printf("can not open cm3 bin file: %s\n", cm3_bin_name);
+		printf("can not open cm3 bin file: %s\n", cm3_bin_name);
 		return;
 	}
 	fseek(fb, 0, SEEK_SET);
@@ -75,7 +75,6 @@ void attach_cm3_binary(FILE *fp, char *cm3_bin_name)
 	fgetpos(fp, &fp_cur);
 	vPOS(fp_cur) = DW_ALIGNED_BYTE_SIZE(vPOS(fp_cur));
 	fsetpos(fp, &fp_cur);
-
 }
 
 void copy_cm3(FILE *fp, fpos_t start)
@@ -98,10 +97,9 @@ void copy_cm3(FILE *fp, fpos_t start)
 	jeq_code(fp, SBC_BASE + SBC_STS, BIT(5), BIT(5), "l_copy_from_sram");
 	cp_code(fp, SPI_BASE + hdr.src, hdr.dst, hdr.size_dw);
 	jmp_code(fp, "l_copy_done");
-	declare_label(fp, "l_copy_from_sram");	
+	declare_label(fp, "l_copy_from_sram");
 	cp_code(fp, SRAM_BASE + hdr.src, hdr.dst, hdr.size_dw);
 	declare_label(fp, "l_copy_done");
-	
 }
 
 void enable_cm3(FILE *fp)
@@ -117,5 +115,5 @@ void enable_cm3(FILE *fp)
 	wr_single(fp, SCU_BASE + 0xa00, 0);
 #if 0	
 	wr_single(fp, SCU_BASE + 0xa00, 1);
-#endif	
+#endif
 }

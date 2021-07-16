@@ -75,7 +75,7 @@ void uart_putc(FILE *fp, uint8_t c)
 
 void attach_ca7_jump_code(FILE *fp)
 {
-	uint32_t ca7_jmp_code[3] = 	{ 0xe3000000, 0xe3400001, 0xe1a0f000 };
+	uint32_t ca7_jmp_code[3] = { 0xe3000000, 0xe3400001, 0xe1a0f000 };
 
 	fwrite(&ca7_jmp_code, 1, sizeof(ca7_jmp_code), fp);
 }
@@ -95,13 +95,13 @@ void parse_boot_image(void)
 		return;
 	}
 
-	printf("%s: secure boot header-> patch address %08x, size %08x\n", __func__, sbh.patch_location, sbh.img_size);
+	printf("%s: secure boot header-> patch address %08x, size %08x\n",
+	       __func__, sbh.patch_location, sbh.img_size);
 	fseek(fp, sbh.patch_location, SEEK_SET);
 	parse_opcode(fp);
 	fclose(fp);
 }
 
-//int main()
 int main(int argc, char *argv[])
 {
 	FILE *fp;
@@ -115,14 +115,13 @@ int main(int argc, char *argv[])
 	/* parsing input args */
 	if (argc > 1)
 		cm3_bin_name = argv[1];
-		        
-	printf("cm3 bin name = %s\n", cm3_bin_name);
 
+	printf("cm3 bin name = %s\n", cm3_bin_name);
 
 	fp = fopen("boot.bin", "wb+");
 	if (!fp) {
-	    printf("can not open dest file: %s\n", "boot.bin");
-	    return -1;
+		printf("can not open dest file: %s\n", "boot.bin");
+		return -1;
 	}
 	fseek(fp, 0, SEEK_SET);
 
@@ -137,7 +136,7 @@ int main(int argc, char *argv[])
 	fwrite(&sbh, 1, sizeof(sbh), fp);
 	fseek(fp, CONFIG_OFFSET_PATCH_START, SEEK_SET);
 
-	/* ---------- patch code header ---------- */ 
+	/* ---------- patch code header ---------- */
 	start_code(fp);
 	//uart_init(fp);
 	uart_putc(fp, '\r');
@@ -150,29 +149,29 @@ int main(int argc, char *argv[])
 	uart_putc(fp, '0');
 	uart_putc(fp, '5');
 	jmp_code(fp, "l_start");
-	
-	/* ---------- CM3 image ---------- */ 
+
+	/* ---------- CM3 image ---------- */
 	fgetpos(fp, &cm3_img_start);
 	attach_cm3_binary(fp, cm3_bin_name);
-	
-	/* ---------- patch code start ---------- */ 
+
+	/* ---------- patch code start ---------- */
 	declare_label(fp, "l_start");
 	sdram_probe(fp);
 	copy_cm3(fp, cm3_img_start);
 	enable_cm3(fp);
-	/* ---------- patch code end ---------- */ 
+	/* ---------- patch code end ---------- */
 	quit_code(fp);
 
 	print_labels();
-	
+
 	/* link label addresses and jump instructions */
 	link_labels(fp);
-	
-	/* ---------- end ---------- */ 
+
+	/* ---------- end ---------- */
 
 	print_rom_patch(fp);
 
-	fclose(fp);	
+	fclose(fp);
 
 	/* test: parse commands */
 	parse_boot_image();
