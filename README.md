@@ -1,26 +1,33 @@
-# AST2600 ROM patch code generator
+# Aspeed ROM-patch image generator
+This tool generates the boot image for Aspeed AST2605 SOC.
+
+
 ## Usage
-### step 1: configure `CONFIG_OFFSET_PATCH_START` in `config.h`
-this is the address offset of this patch code binary that will be placed on the SPI Flash.
-The default value is 0x50.  Modify it if necessary, then execute `make` to generate `rom_patch`
+### compile
+```
+git clone 
+cd rom-patcher
+make
+```
+### execution
+```
+./rom-patcher path-to-the-ssp-image
+```
+#### args
+- `path-to-the-ssp-image`: optional.  This argument indicates the path to the ssp image that you want to pack into
+the boot image.  If it is not set, `rom-patcher` uses the default ssp image `zephyr.bin`
 
-Note: this step can be ignored if `CONFIG_OFFSET_PATCH_START` isn't changed.
+## Customization
+### location of the patch code image
+In `config.h`, modify `CONFIG_OFFSET_PATCH_START` to change the offset of the patch code on the firmware SPI Flash memory. The default value is 0x50.  
+```
+#define CONFIG_OFFSET_PATCH_START 0x50
+```
 
-### step 2: update CM3 binary
-update `ast2600_ssp.bin` to the root folder
-
-Note: this step can be ignored if `ast2600_ssp.bin` isn't changed.
-
-### step 3: execution
-execute `./rom_patch`, the output file `boot.bin` will be generated.
-- `boot.bin`: including CA7 jump code, secure boot header, ROM patch and CM3 image
-
-## Generate patch code for different targets
-
-Modify `config.h` and re-compile `rom_patch`
-
-- `CONFIG_FPGA_ASPEED`: for FPGA
-- `CONFIG_ASPEED_DDR4_DUALX8`: DDR4 dual X8 die
-- AC timing
-  - `CONFIG_ASPEED_DDR4_1600`: DDR4-1600 AC timing
+### DRAM configuration
+In `config.h`, modify the following options if necessary.
+- `#define CONFIG_FPGA_ASPEED`: enable FPGA DRAM configuration (default off)
+- `#define CONFIG_ASPEED_DDR4_DUALX8`: enable DDR4 dual X8 die (default off)
+- DDR speed
+  - `CONFIG_ASPEED_DDR4_1600`: DDR4-1600 AC timing (default speed)
   - `CONFIG_ASPEED_DDR4_800`: DDR4-800 AC timing
