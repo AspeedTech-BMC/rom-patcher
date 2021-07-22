@@ -5,7 +5,6 @@ This tool generates the boot image for Aspeed AST2605 SOC.
 ## Usage
 ### compile
 ```
-git clone 
 cd rom-patcher
 make
 ```
@@ -15,14 +14,11 @@ make
 ```
 #### args
 - `path-to-the-ssp-image`: optional.  This argument indicates the path to the ssp image that you want to pack into
-the boot image.  If it is not set, `rom-patcher` uses the default ssp image `zephyr.bin`
+the boot image.  If it is not set, `rom-patcher` uses the default ssp image `./zephyr.bin`
 
 ## Customization
-### location of the patch code image
-In `config.h`, modify `CONFIG_OFFSET_PATCH_START` to change the offset of the patch code on the firmware SPI Flash memory. The default value is 0x50.  
-```
-#define CONFIG_OFFSET_PATCH_START 0x50
-```
+### Address offset of the patch code image on the firmware SPI Flash
+In `config.h`, modify `CONFIG_OFFSET_PATCH_START` to change the offset of the patch code on the firmware SPI Flash memory. The default value is 0x50.
 
 ### DRAM configuration
 In `config.h`, modify the following options if necessary.
