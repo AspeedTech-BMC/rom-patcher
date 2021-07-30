@@ -1,3 +1,8 @@
+/* 
+ * This file lists the pseudo code of the DRAM initialization sequence for
+ * ASPEED AST26XX series SOC.
+ */
+
 /* check if already initialized */
 Read  [0x1e6e2100] = 0x00000000    ◊ goto /* calculate size */ if SCU100[6]==1
 
@@ -202,8 +207,11 @@ delay 500 us
 /* DLL/ZQCL enable */
 Write [0x1e6e000c] = 0x00000040
 
-/* weird */
-這邊假如delay太久(例如call printf or delay 2000us)的話，會導致DDR init. Fail
+/* 
+ * Attention:
+ * if the delay time is too long here (e.g. printf or delay 2000us), the ddr
+ * initialization would be failed
+ */
 
 /* load MMC AC timing parameters */
 Write [0x1e6e0030] = 0x00000007
